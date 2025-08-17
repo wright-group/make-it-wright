@@ -1,10 +1,7 @@
-__name__ = "parsers"
-__author__ = "Chris Roy, Song Jin Research Group, Dept. of Chemistry, University of Wisconsin - Madison"
-
 from psutil import virtual_memory
 from os import listdir
 from os.path import isfile, isdir, getsize
-import andor, beckerhickl, horiba, iontof, xrd, afm
+from .process import andor, beckerhickl, horiba, iontof, xrd, afm
 import WrightTools as wt
 
 def typeID(*fpaths, sorted=False):

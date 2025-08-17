@@ -1,8 +1,6 @@
-__name__ = "styles"
-__author__ = "Chris Roy, Song Jin Research Group, Dept. of Chemistry, University of Wisconsin - Madison"
-
 import matplotlib as mpl
 import cmocean
+
 
 beckerhickl_transient = {
     "xlabel" : "time (ns)",

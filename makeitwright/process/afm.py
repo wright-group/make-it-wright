@@ -1,9 +1,6 @@
-__name__ = "AFM"
-__author__ = "Chris R. Roy, Song Jin Research Group, Department of Chemistry, University of Wisconsin-Madison"
-
 import numpy as np
 import WrightTools as wt
-from processhelpers import norm
+
 
 def fromPicoView(filepath, name=None, convert_units=True, flatten_order=0):
     """

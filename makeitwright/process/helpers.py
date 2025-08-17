@@ -1,10 +1,7 @@
-__name__ = "processhelpers"
-__author__ = "Chris Roy, Song Jin Research Group, Dept. of Chemistry, University of Wisconsin - Madison"
-
 import numpy as np
 from scipy.signal import find_peaks_cwt
 import matplotlib as mpl
-from matplotlib import pyplot as plt
+import matplotlib.pyplot as plt
 import WrightTools as wt
 
 def parse_args(data, *args, dtype='Axis', return_name=True):

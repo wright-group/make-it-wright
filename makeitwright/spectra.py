@@ -1,10 +1,8 @@
-__name__ = 'spectra'
-
 import numpy as np
 import WrightTools as wt
 from matplotlib import pyplot as plt
-import processhelpers as proc
-import styles
+from .process import helpers
+from . import styles
 
 """
 Data objects with one axis alone
@@ -55,18 +53,18 @@ def plot_spectra(data, **kwargs):
     
     for i in range(len(data)):
         #convert axis/channel indices to natural names
-        axis, = proc.parse_args(data[i], params["axis"])
+        axis, = helpers.parse_args(data[i], params["axis"])
         
         if params['channel']=='prompt': #kill this if else if all your code suddenly stops working
-            channel, = proc.parse_args(data[i], input(f'select channel from {data[i].natural_name}: {[ch.natural_name  for ch in data[i].channels]} '),  dtype='Channel')
+            channel, = helpers.parse_args(data[i], input(f'select channel from {data[i].natural_name}: {[ch.natural_name  for ch in data[i].channels]} '),  dtype='Channel')
         else:    
-            channel, = proc.parse_args(data[i], params["channel"],  dtype='Channel')
+            channel, = helpers.parse_args(data[i], params["channel"],  dtype='Channel')
         if data[i][channel].signed:
             signed=True
     
         #extract ROI
         if params["ROI"] is not None:
-            out = proc.roi(data[i], params["ROI"])
+            out = helpers.roi(data[i], params["ROI"])
         else:
             out = data[i]
     
@@ -91,7 +89,7 @@ def plot_spectra(data, **kwargs):
     if params["xrange"] is not None:
         xrange = params["xrange"]
     else:
-        xrange = proc.get_range(*data, reference_key=params["axis"], dtype='Axis')
+        xrange = helpers.get_range(*data, reference_key=params["axis"], dtype='Axis')
     if params["xscale"] == 'log' and xrange[0]<=0:
         xrange[0] = 0.001
     ax.set_xlim(*xrange)
@@ -108,7 +106,7 @@ def plot_spectra(data, **kwargs):
     if params["vrange"] is not None:
         vrange = params["vrange"]
     else:
-        vrange = proc.get_range(*data, reference_key=params["channel"], offset=params["offset"])
+        vrange = helpers.get_range(*data, reference_key=params["channel"], offset=params["offset"])
     if params["yscale"] == 'log' and vrange[0]<=0:
         vrange[0] = 0.01
     ax.set_ylim(*vrange)
@@ -143,10 +141,10 @@ def plot_tandem(d1,d2, figsize=(2.6,1), axis=0, channels=(-1,-1),
     ax2 = ax1.twinx()
 
     #convert axis/channel indices to natural names
-    axis1, = proc.parse_args(d1, axis)
-    axis2, = proc.parse_args(d2, axis)
-    channel1, = proc.parse_args(d1, channels[0],  dtype='Channel')
-    channel2, = proc.parse_args(d2, channels[1],  dtype='Channel')
+    axis1, = helpers.parse_args(d1, axis)
+    axis2, = helpers.parse_args(d2, axis)
+    channel1, = helpers.parse_args(d1, channels[0],  dtype='Channel')
+    channel2, = helpers.parse_args(d2, channels[1],  dtype='Channel')
     
     #plot data
     ax1.plot(d1[axis1][:],d1[channel1][:], linewidth=linewidth, color=colors[0])
@@ -160,7 +158,7 @@ def plot_tandem(d1,d2, figsize=(2.6,1), axis=0, channels=(-1,-1),
     
     #adjust plot frame
     if xrange is None:
-        xrange = proc.get_range(*[d1,d2], reference_key=axis, dtype='Axis')
+        xrange = helpers.get_range(*[d1,d2], reference_key=axis, dtype='Axis')
     ax1.set_xlim(*xrange)
     ax1.set_xlabel(xlabel)
     if not xticks:
@@ -169,9 +167,9 @@ def plot_tandem(d1,d2, figsize=(2.6,1), axis=0, channels=(-1,-1),
     for i, v in enumerate(vranges):
         if v is None:
             if i==0:
-                vranges[i] = proc.get_range(d1, reference_key=channel1, offset=0)
+                vranges[i] = helpers.get_range(d1, reference_key=channel1, offset=0)
             if i==1:
-                vranges[i] = proc.get_range(d2, reference_key=channel2, offset=0)
+                vranges[i] = helpers.get_range(d2, reference_key=channel2, offset=0)
     ax1.set_ylim(*vranges[0])
     ax2.set_ylim(*vranges[1])
     ax1.set_ylabel(ylabels[0])

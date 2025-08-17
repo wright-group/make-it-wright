@@ -2,11 +2,11 @@
 # Process PL Data from Wright group
 
 import pathlib
-import andor
+import makeitwright.process.andor as andor
 from makeitwright.process.helpers import roi
 from makeitwright.parsers import parse
-from artists import setparams, setdpi
-from spectra import plot_spectra as plot
+from makeitwright.artists import setparams, setdpi
+from makeitwright.spectra import plot_spectra as plot
 
 
 setparams()

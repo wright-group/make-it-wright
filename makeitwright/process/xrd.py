@@ -1,14 +1,14 @@
-__name__ = "xrd"
-__author__ = "Chris Roy, Song Jin Research Group, Dept. of Chemistry, University of Wisconsin - Madison"
-
 import numpy as np
 from matplotlib import pyplot as plt
 from scipy.optimize import curve_fit
 from scipy.stats import pearsonr
-from math import pi
 import WrightTools as wt
-import spectra, styles
-from processhelpers import norm, roi
+import makeitwright.spectra as spectra, styles
+from .helpers import norm, roi
+
+
+pi = np.pi
+
 
 def fromBruker(*filepaths):
     d = []

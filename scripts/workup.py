@@ -1,12 +1,13 @@
-import os
 from numpy import inf
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 from scipy.stats import pearsonr, moyal, cauchy
-user = 'ASUS'
-#user = 'Chris'
-#os.chdir(f'C:/Users/{user}/OneDrive/Documents/UW/research/scripts/makeitwright_0-6')
+import pathlib
+
+from scipy.signal import savgol_filter
+from matplotlib import pyplot as plt
+
 
 def lorentz_fit_2(data, channel='darksub', xrange='all', bounds=None, plot=False):
 
@@ -131,29 +132,15 @@ def testfit(data, channel='darksub', xrange='all', bounds=None, plot=False):
 
     return fits
 
-from scipy.signal import savgol_filter
-import matplotlib as mpl
-from matplotlib import pyplot as plt
-from natsort import natsorted
-from matplotlib import cm as cms
-from cmocean import cm as cmo
-from artists import setparams, setdpi
-setparams()
-setdpi(600)
-import spectra
-import andor as an
-from parsers import listfiles, parse
-from processhelpers import roi, norm, show, __at, contrast, set_label
 
 def residual(a, fit):
     return (a-fit)/a*100
 
-base = f'C:/Users/{user}/OneDrive/Documents/UW/research/data local/WG-microscope/biexciton-fluence-dependent-PL_20220909'
-#base = 'E:/data_local/WG-microscope/kristel_PL_20220909'
-fn1 = f'{base}/n1BA'
-fn2 = f'{base}/n2BAMA_CRRsample'
-fn3 = f'{base}/n3BAMA_CRRsample/fluence-series'
-fn4 = f'{base}/n4BAMA'
+base = pathlib.Path().expanduser().resolve() / r'OneDrive/Documents/UW/research/data local/WG-microscope/biexciton-fluence-dependent-PL_20220909'
+fn1 = base / "n1BA"
+fn2 = base / 'n2BAMA_CRRsample'
+fn3 = base / 'n3BAMA_CRRsample/fluence-series'
+fn4 = base / 'n4BAMA'
 n1raw, n2raw, n3raw, n4raw = parse(fn1), parse(fn2), parse(fn3), parse(fn4)
 
 for d in n1raw:

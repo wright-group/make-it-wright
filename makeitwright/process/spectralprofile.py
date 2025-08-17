@@ -1,17 +1,12 @@
-__name__ = "spectralprofile"
-__author__ = "Chris R. Roy, Song Jin & John C. Wright Research Groups, Dept. of Chemistry, University of Wisconsin-Madison"
+"""Methods for two-dimensional data consisting of a spectral axis (0) and a spatial axis (1)."""
 
-"""
-Methods for two-dimensional data consisting of a spectral axis (0) and a spatial axis (1).
-"""
 
-#import
-import WrightTools as wt
 import numpy as np
 import matplotlib as mpl
 from matplotlib import pyplot as plt
-import processhelpers as ph
-import styles
+from . import helpers as ph
+import makeitwright.styles as styles
+
 
 def remove_spectral_background(data, channel, spatial_reference_range, name=None, create_background_channel=False, talkback=True):
     """

@@ -2,7 +2,8 @@ import numpy as np
 import WrightTools as wt
 import matplotlib.cm as cm
 from matplotlib import pyplot as plt
-from makeitwright.process.helpers import roi, parse_args
+from .process.helpers import roi, parse_args
+from . import styles
 
 def plot(data, **kwargs):
     if type(data) is wt.Collection:

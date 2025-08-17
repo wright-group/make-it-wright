@@ -1,16 +1,13 @@
-__name__ = "andor"
-__author__ = "Chris Roy, Song Jin Research Group, Dept. of Chemistry, University of Wisconsin - Madison"
-
 import pathlib
 import os
 import warnings
 import numpy as np
 import WrightTools as wt
 
-import image
-import spectralprofile
-from processhelpers import __at, roi, set_label, get_channels
-import styles
+from . import image
+from . import spectralprofile
+from .helpers import roi, set_label, get_channels
+import makeitwright.styles as styles
 
 APD_PIXEL = (1325, 1080)
 SLIT_PIXEL_COLUMN = 1325

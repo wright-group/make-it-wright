@@ -1,17 +1,18 @@
 
 # Process Reflectance/Transmittance/Absorbance Data from Wright group
 
-import andor
-from processhelpers import roi
-from parsers import parse
-from artists import setparams, setdpi
-from spectra import plot_spectra as plot
+import pathlib
+import makeitwright.process.andor as andor
+from makeitwright.process.helpers import roi
+from makeitwright.parsers import parse
+from makeitwright.artists import setparams, setdpi
+from makeitwright.spectra import plot_spectra as plot
 
 
 setparams()
 setdpi(150)
 
-filepath = "C:/Users/kmfor/Desktop/Research Data/Wright Table/Original/test"
+filepath = pathlib.Path().expanduser().resolve() / "Desktop/Research Data/Wright Table/Original/test"
 filename_R = "PEAPbBr4 R"
 filename_RBack = "PEAPbBr4 R Back"
 filename_T = "PEAPbBr4 T"

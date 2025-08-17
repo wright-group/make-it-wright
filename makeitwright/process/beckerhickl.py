@@ -7,10 +7,16 @@ import WrightTools as wt
 from scipy.optimize import curve_fit
 from scipy.stats import pearsonr
 
-import spectra
-import processhelpers as proc
-from processhelpers import get_axes, get_channels, set_label, roi
-import styles
+from . import helpers
+import makeitwright.spectra as spectra
+import makeitwright.styles as styles
+
+
+get_axes = helpers.get_axes
+get_channels = helpers.get_channels
+set_label = helpers.set_label
+roi = helpers.roi
+
 
 def fromSP130(fpath, name=None):
     if fpath.split('.')[-1] != 'asc':
@@ -36,7 +42,7 @@ def fromSP130(fpath, name=None):
     out.create_channel('sig', values=sig)
     out['sig'].attrs['label'] = "PL counts"
     out.transform('t')
-    out.create_channel('norm', values=proc.norm(out['sig'][:], 0.01, 1))
+    out.create_channel('norm', values=helpers.norm(out['sig'][:], 0.01, 1))
     out['norm'].attrs['label'] = "norm. PL counts"
     
     return out
@@ -54,7 +60,7 @@ def get_fits(data, channel='norm', function='biexp'):
     
     fits = {}
     for i in range(len(data)):
-        out = proc.roi(data[i], {'t':[0]})
+        out = helpers.roi(data[i], {'t':[0]})
         fit, cov  = curve_fit(functions[function], out['t'][:], out[channel][:], bounds=(0,1000000), maxfev=1000*len(out['t'][:]))
         std = np.sqrt(np.diag(cov))
         
