@@ -1,12 +1,13 @@
 __name__ = "iontof"
 __author__ = "Chris Roy, Song Jin Research Group, Dept. of Chemistry, University of Wisconsin - Madison"
-__version__ = 0.0
 
 import numpy as np
+import cmocean
 import pySPM
 import WrightTools as wt
-from makeitwright.process.hyperspectral import remove_background
-from makeitwright.process.helpers import parse_args, normalize_by_axis
+import hyperspectral, styles
+from hyperspectral import remove_background
+import processhelpers as proc
 
 def relative_proportion(data, channel0, channel1):
     """
@@ -26,15 +27,15 @@ def relative_proportion(data, channel0, channel1):
     """
     
     #convert channel indices to natural names
-    channels = parse_args(data, channel0, channel1, dtype='Channel')
+    channels = proc.parse_args(data, channel0, channel1, dtype='Channel')
     
     #ensure regions with no signal don't show up
     remove_background(data, *channels, threshold_value=0.99, new_value=1)
     dump = [data.channels[-2].natural_name, data.channels[-1].natural_name]
     
     #calculate normalized difference between channels
-    normalize_by_axis(data, channels[0], 'x', 'y', 'scan')
-    normalize_by_axis(data, channels[1], 'x', 'y', 'scan')
+    proc.normalize_by_axis(data, channels[0], 'x', 'y', 'scan')
+    proc.normalize_by_axis(data, channels[1], 'x', 'y', 'scan')
     ch_arr0 = data.channels[-2][:]
     dump.append(data.channels[-2].natural_name)
     ch_arr1 = data.channels[-1][:]
@@ -50,12 +51,40 @@ def relative_proportion(data, channel0, channel1):
     data.create_channel(ch_name, values=ch_arr, verbose=True)
     data[ch_name].signed = True
 
+def plot_image(data, channel, **kwargs):
+    
+    params = {}
+    params.update(styles.image_iontof)
+    if data[channel].signed:
+        params["cmap"] = cmocean.cm.curl
+    params.update(**kwargs)
+
+    hyperspectral.plot_image(data, channel, **params)
+
+def plot_profile(data, profile_axis, channel, **kwargs):
+    
+    params = {}
+    params.update(styles.profile_iontof)
+    if data[channel].signed:
+        kwargs["cmap"] = cmocean.cm.curl
+    params.update(**kwargs)
+    
+    hyperspectral.plot_profile(data, profile_axis, channel, **params)
+
+def plot_depth_trace(data, channel, **kwargs):
+    
+    params = {}
+    params.update(styles.decomposition_iontof)
+    params.update(**kwargs)
+    
+    hyperspectral.plot_decomposition(data, 'x', 'y', 'scan', channel, **kwargs)
+
 def ITApeaks(fpath):
     ita=pySPM.ITA(fpath)
     summ = ita.get_summary()
     return summ['peaks']
 
-def from_ITA(fpath, name=None, select_channels=None):
+def fromITA(fpath, name=None, select_channels=None):
 
     ita = pySPM.ITA(fpath)
     ita.show_summary()

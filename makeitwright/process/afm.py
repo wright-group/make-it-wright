@@ -1,17 +1,17 @@
 __name__ = "AFM"
 __author__ = "Chris R. Roy, Song Jin Research Group, Department of Chemistry, University of Wisconsin-Madison"
-__version__ = 0.0
 
 import numpy as np
 import WrightTools as wt
+from processhelpers import norm
 
-def flatten(data, channel):
+def fromPicoView(filepath, name=None, convert_units=True, flatten_order=0):
+    """
+    Does nothing! (under development)
+    """
     pass
 
-def ID_steps(data, channel):
-    pass
-
-def from_Gwyddion_traces(filepath, name=None):
+def fromGwyddion_traces(filepath, name=None, convert_units=True, ID_steps=False, flatten=False):
     """
     Generate individual Data objects for a series of traces as exported from Gwyddion workup.
     
@@ -67,25 +67,31 @@ def from_Gwyddion_traces(filepath, name=None):
     for i, (profile, dim, unit) in enumerate(zip(profiles, dims, units)):
         x, y = profile[:,0], profile[:,1]
 
-        if unit is None:
-            x = wt.units.convert(x,'m','um')
-            xunit, yunit = 'm', 'm'
-            print(f'no units for x or y identified - assumed each to be meters')
-        else:
-            if wt.units.is_valid_conversion(unit[0], 'um'):
-                x = wt.units.convert(x, unit[0], 'um')
-                xunit = 'um'
+        if convert_units:
+            if unit is None:
+                x = wt.units.convert(x,'m','um')
+                xunit, yunit = 'm', 'm'
+                print(f'no units for x or y identified - assumed each to be meters')
             else:
-                print(f'unrecognized unit {unit[0]} for x dimension of profile {i} - conversion did not proceed')
-                xunit = unit[0]
-            if wt.units.is_valid_conversion(unit[1], 'nm'):
-                y = wt.units.convert(y, unit[1], 'nm')
-                yunit = 'nm'
-            else:
-                print(f'unrecognized unit {unit[1]} for x dimension of profile {i} - conversion did not proceed')
-                yunit = unit[1]
+                if wt.units.is_valid_conversion(unit[0], 'um'):
+                    x = wt.units.convert(x, unit[0], 'um')
+                    xunit = 'um'
+                else:
+                    print(f'unrecognized unit {unit[0]} for x dimension of profile {i} - conversion did not proceed')
+                    xunit = unit[0]
+                if wt.units.is_valid_conversion(unit[1], 'nm'):
+                    y = wt.units.convert(y, unit[1], 'nm')
+                    yunit = 'nm'
+                else:
+                    print(f'unrecognized unit {unit[1]} for x dimension of profile {i} - conversion did not proceed')
+                    yunit = unit[1]
 
-        xlabel = f'distance ({xunit})'
+        if ID_steps:
+            steppos = np.argmax(np.abs(np.gradient(y)))
+            x = x-x[steppos]
+            xlabel = f'distance from edge ({xunit})'
+        else:
+            xlabel = f'distance ({xunit})'
 
         if flatten:
             slope = np.median(np.gradient(y))/np.median(np.gradient(x))

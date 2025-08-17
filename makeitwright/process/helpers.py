@@ -1,6 +1,5 @@
 __name__ = "processhelpers"
 __author__ = "Chris Roy, Song Jin Research Group, Dept. of Chemistry, University of Wisconsin - Madison"
-__version__ = 0.0
 
 import numpy as np
 from scipy.signal import find_peaks_cwt
@@ -34,6 +33,43 @@ def parse_args(data, *args, dtype='Axis', return_name=True):
     else:
         return tuple(argout)
 
+def parse_kwargs(params, **kwargs):
+    for key, value in kwargs.items():
+        params[key] = value
+    return params
+
+def get_axes(data, *keys, asindex=False):
+    idx = list(keys)
+    axdict = {ax.natural_name:i for i, ax in enumerate(data.axes)}
+    for i, key in enumerate(keys):
+        if type(key) is not int:
+            try:
+                idx[i] = axdict[key]
+            except KeyError:
+                print(f'axis {key} not found')
+                idx[i] = None
+    idx = [i for i in idx if i is not None]
+    if asindex:
+        return tuple(idx)
+    else:
+        return tuple([data.axes[i].natural_name for i in idx])
+
+def get_channels(data, *keys, asindex=False):
+    idx = list(keys)
+    chdict = {ch.natural_name:i for i, ch in enumerate(data.channels)}
+    for i, key in enumerate(keys):
+        if type(key) is not int:
+            try:
+                idx[i] = chdict[key]
+            except KeyError:
+                print(f'axis {key} not found')
+                idx[i] = None
+    idx = [i for i in idx if i is not None]
+    if asindex:
+        return tuple(idx)
+    else:
+        return tuple([data.channels[i].natural_name for i in idx])
+
 def set_label(data, key, name):
     if type(key) is not str:
         raise TypeError(f'key must be string, function received {type(key)}')
@@ -47,13 +83,70 @@ def set_label(data, key, name):
         except KeyError:
             print(f'no object with key {key} in data {d.natural_name}')
 
-def normalize(arr, tmin, tmax):
+def find_nearest(arr, val, return_index=True):
+    idx = (np.abs(arr-val)).argmin()
+    if return_index:
+        return idx
+    else:
+        return arr[idx]     
+    
+def find_peaks(*data, channel=-1, axis=0, peak_width="medium", noisy=False, **kwargs):
+    peaks = {}
+    cwtargs = {}
+    if noisy:
+        cwtargs["min_snr"] = 2
+    cwtargs.update(kwargs)
+
+    for i, d in enumerate(data):
+        channel, = parse_args(d, channel, dtype='Channel')
+        axis, = parse_args(d, axis)
+        dname = str(i) + "_" + d.natural_name
+        peaks[dname] = {}
+        
+        axratio = d[axis].size/(np.max(d[axis].points) - np.min(d[axis].points))
+        peak_width_vals = {
+            "narrow" : d[axis].size/1000,
+            "medium" : d[axis].size/100,
+            "broad" : d[axis].size/10
+            }    
+        if type(peak_width) is int or type(peak_width) is float:
+            width = axratio*peak_width
+        else:
+            try:
+                width = peak_width_vals[peak_width]
+            except KeyError:
+                print('Peak width argument not recognized. Select between narrow, medium, or broad.')
+                width = peak_width_vals["medium"]
+        
+        if len(d[channel].shape)>1:
+            out = d.chop(axis)
+            out = [spect for spect in out.values()]
+            for i, spect in enumerate(out):
+                peaks[dname][str(i)] = {}
+                peaks[dname][str(i)]["coords"] = [(c.natural_name, c.value) for c in spect.constants]
+                if np.sum(spect[channel][:]) != 0:
+                    p = find_peaks_cwt(spect[channel].points, width, **cwtargs)
+                    if p.size==0:
+                        peaks[dname][str(i)]["peaks"] = None
+                    else:
+                        peaks[dname][str(i)]["peaks"] = np.asarray([spect[axis][idx] for idx in p])
+        else:
+            if np.sum(d[channel][:]) != 0:
+                p = find_peaks_cwt(d[channel].points, width, **cwtargs)
+                if p.size==0:
+                    peaks[dname] = None
+                else:
+                    peaks[dname] = np.asarray([d[axis][idx] for idx in p])
+    
+    return peaks
+
+def norm(arr, tmin, tmax):
     diff = tmax-tmin
     arr_range = np.max(arr)-np.min(arr)
     norm_arr = np.nan_to_num((((arr-np.min(arr))*diff)/arr_range) + tmin)
     return norm_arr
 
-def __split_n(arr, *axes):
+def split_n(arr, *axes):
     """
     Split an array sequentially along multiple axes. Multi-axis calls nested lists of arrays. Calling a single axis is equivalent to the numpy.split() method.
 
@@ -74,14 +167,38 @@ def __split_n(arr, *axes):
         if type(arr) is list:
             spl_arr = []
             for a in arr:
-                spl_arr.append(__split_n(a, *axes))
+                spl_arr.append(split_n(a, *axes))
             arr = spl_arr
         else:
             arr = np.split(arr, arr.shape[axes[0]], axis=axes[0])
         del(axes[0])
     return arr
 
-def __inverse_split_n(split_arr, *split_axes):
+def norm_split(split_arr, bounds): #TODO generalize to arbitrary operation
+    """
+    Independently normalize all sub-arrays in a sequentially split numpy array.
+
+    Parameters
+    ----------
+    split_arr : lists of numpy arrays
+        The split array in the form generated by split_n.
+    bounds : 2-element iterable of ints
+        The lower and upper bounds of the normalized array, in order.
+    Returns
+    -------
+    split_arr : lists of numpy arrays
+        The normalized arrays in the same format as-called.
+    """
+    if type(split_arr) is list:
+        l = []
+        for a in split_arr:
+            l.append(norm_split(a, bounds))
+        split_arr = l
+    else:
+        split_arr = norm(split_arr, bounds[0], bounds[1])
+    return split_arr
+
+def inverse_split_n(split_arr, *split_axes):
     """
     Reconstruct a split array into its original form, provided the list of axes that was used to split the array via split_n.
 
@@ -102,12 +219,47 @@ def __inverse_split_n(split_arr, *split_axes):
         if type(split_arr[0]) is list:
             arr = []
             for l in split_arr:
-                arr.append(__inverse_split_n(l, split_axes[-1]))
+                arr.append(inverse_split_n(l, split_axes[-1]))
             split_arr = arr
             del(split_axes[-1])
         else:
             split_arr = np.concatenate(split_arr, axis=split_axes[-1])
             del(split_axes[-1])
+    return split_arr
+
+def func_split(split_arr, func='norm', **kwargs): #TODO make func keyword able to call arbitrary external array functions
+    """
+    Independently perform a function on all sub-arrays in a sequentially split numpy array.
+
+    Parameters
+    ----------
+    split_arr : lists of numpy arrays
+        The split array in the form generated by split_n.
+    bounds : 2-element iterable of ints
+        The lower and upper bounds of the normalized array, in order.
+    Returns
+    -------
+    split_arr : lists of numpy arrays
+        The normalized arrays in the same format as-called.
+    """
+    
+    params = {
+        'norm':{'bounds':[0,1]},
+        'bkg_remove':{'negative':False, 'threshold':0.5, 'top_range':100},
+        'spike_filter':{'width':4}
+        }
+    params[func] = kwargs
+    
+    if type(split_arr) is list:
+        l = []
+        for a in split_arr:
+            l.append(norm_split(a, func=func, **params[func]))
+        split_arr = l
+    else:
+        if func=='norm':
+            split_arr = norm(split_arr, params[func]['bounds'][0], params[func]['bounds'][1])
+        if func=='bkg_remove':
+            pass
     return split_arr
 
 def normalize_by_axis(data, channel, *axes, bounds=(0,1)):
@@ -134,29 +286,69 @@ def normalize_by_axis(data, channel, *axes, bounds=(0,1)):
     None.
         Adds a normalized channel to the Data instance.
     """
-    def __norm_split(split_arr, bounds): #TODO generalize to arbitrary operation
-        if type(split_arr) is list:
-            l = []
-            for a in split_arr:
-                l.append(__norm_split(a, bounds))
-            split_arr = l
-        else:
-            split_arr = normalize(split_arr, bounds[0], bounds[1])
-        return split_arr
-
     axes = parse_args(data, *axes, return_name=False)
     dims = [i for i, axis in enumerate(data.axes) if i not in axes]
     channel, = parse_args(data, channel, dtype='Channel')
     
     ch_arr = data[channel][:]
-    ch_spl = __split_n(ch_arr, *dims)
-    ch_spl_norm = __norm_split(ch_spl, bounds)
-    ch_norm = __inverse_split_n(ch_spl_norm, *dims)
+    ch_spl = split_n(ch_arr, *dims)
+    ch_spl_norm = norm_split(ch_spl, bounds)
+    ch_norm = inverse_split_n(ch_spl_norm, *dims)
     ch_name = "norm_"
     for ax in [axis.natural_name for i, axis in enumerate(data.axes) if i not in dims]:
         ch_name = ch_name + data[ax].natural_name
     
     data.create_channel(ch_name, values=ch_norm)
+
+def background_mask(data, channel, *axes, negative=True):
+    axes = parse_args(data, *axes, return_name=False)
+    dims = [i for i, axis in enumerate(data.axes) if i not in axes]
+    channel, = parse_args(data, channel, dtype='Channel')
+    
+    ch_arr = data[channel][:]
+    ch_spl = split_n(ch_arr, *dims)
+    pass
+
+def get_range(*data, reference_key=0, dtype='Channel', window='default', offset=0):
+    ranges = []
+    signed=False
+    default_windows = {
+        'Axis' : 1,
+        'Channel' : 1.1
+        }
+    if window=='default':
+        window = default_windows[dtype]
+    
+    for d in data:   
+        key, = parse_args(d, reference_key, dtype=dtype)
+        ranges.append([np.min(d[key][:]), np.max(d[key][:])])
+        if dtype=='Channel':
+            if d[key].signed:
+                signed=True
+    
+    ranges_min, ranges_max = min([r[0] for r in ranges]), max([r[1] for r in ranges])
+    if offset != 0:
+        ranges_max = sum([r[0] for r in ranges]) + offset*(len(data)-1) + [r[1] for r in ranges][-1]
+    
+    rng = [(ranges_min+(ranges_max-ranges_min)/2)-(window*(ranges_max-ranges_min)/2), (ranges_min+(ranges_max-ranges_min)/2)+(window*(ranges_max-ranges_min)/2)]
+    if signed and ranges_min*ranges_max < 0 and not offset: #make window symmetric about zero if min and max have opposite sign
+        return [-window*max(rng),window*max(rng)]
+    else:
+        return rng
+
+def imshowarr(a, rotate=False, cmap=None, ticks=None, vrange=None):
+    fig, ax = plt.subplots(figsize=(6.5, 6.5))
+    if cmap is None:
+        cmap = mpl.cm.viridis
+    if vrange is None:
+        v = [np.min(a), np.max(a)]
+    else:
+        v = vrange    
+    ax.imshow(a, vmin=v[0], vmax=v[1], cmap=cmap)
+    if ticks is None:
+        ax.set_xticks([])
+        ax.set_yticks([])
+    ax.set_aspect('equal')
 
 def __at(arr, val):
     return (np.abs(arr-val)).argmin()
@@ -241,7 +433,7 @@ def roi(data, ROI, return_arrs=False, verbose=False):
         'sum' : np.sum,
         'product' : np.prod,
         'average' : np.average,
-        'stdev' : np.std,
+        'std' : np.std,
         'var' : np.var,
         'median' : np.median,
         'min' : np.min,
@@ -390,3 +582,14 @@ def show(data):
     if type(data) is not list:
         data = [data]
     return [f'{i} - name: {d.natural_name}, axes:{[ax.natural_name for ax in d.axes]}' for i, d in enumerate(data) if type(d) is wt.Data]
+
+def contrast(d, ch, contrast=[99,1]):
+    return [np.percentile(d[ch][:],min(contrast)),np.percentile(d[ch][:],max(contrast))]
+
+def vrange(arr, signed, window=1.1, manual_range=None):   
+    #determine range to be plotted
+    vmin, vmax = np.min(arr), np.max(arr)
+    if signed and vmin<0:
+        return [-window*max([abs(vmin), abs(vmax)]), window*max([abs(vmin), abs(vmax)])]
+    else:
+        return [(vmin+(vmax-vmin)/2)-(window*(vmax-vmin)/2), (vmin+(vmax-vmin)/2)+(window*(vmax-vmin)/2)]

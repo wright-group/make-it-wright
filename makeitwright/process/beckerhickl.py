@@ -1,6 +1,5 @@
 __name__ = "beckerhickl"
 __author__ = "Chris Roy, Song Jin Research Group, Dept. of Chemistry, University of Wisconsin - Madison"
-__version__ = 0.0
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -8,10 +7,39 @@ import WrightTools as wt
 from scipy.optimize import curve_fit
 from scipy.stats import pearsonr
 
-from .helpers import roi
+import spectra
+import processhelpers as proc
+from processhelpers import get_axes, get_channels, set_label, roi
+import styles
 
-def tmax(data):
-    pass
+def fromSP130(fpath, name=None):
+    if fpath.split('.')[-1] != 'asc':
+        print(f"filetype .{fpath.split('.')[-1]} not supported")
+    else:
+        with open(fpath) as f:
+            txt = f.readlines()
+        header_size = 0
+        for i, line in enumerate(txt):
+            if 'Title' in line.split() and name is None:
+                name = line.split()[-1]
+            if '*BLOCK' in line:
+                header_size = i+1
+
+    arr = np.genfromtxt(fpath, delimiter=',', skip_header=header_size, skip_footer=1)
+    t = arr[:,0]
+    sig = arr[:,1]
+    t = t-t[np.argmax(sig)]
+
+    out = wt.Data(name=name)
+    out.create_variable('t', values=t, units='ns')
+    out['t'].attrs['label'] = "time (ns)"
+    out.create_channel('sig', values=sig)
+    out['sig'].attrs['label'] = "PL counts"
+    out.transform('t')
+    out.create_channel('norm', values=proc.norm(out['sig'][:], 0.01, 1))
+    out['norm'].attrs['label'] = "norm. PL counts"
+    
+    return out
 
 def get_fits(data, channel='norm', function='biexp'):
     def exp(t, a, td):
@@ -26,7 +54,7 @@ def get_fits(data, channel='norm', function='biexp'):
     
     fits = {}
     for i in range(len(data)):
-        out = roi(data[i], {'t':[0]})
+        out = proc.roi(data[i], {'t':[0]})
         fit, cov  = curve_fit(functions[function], out['t'][:], out[channel][:], bounds=(0,1000000), maxfev=1000*len(out['t'][:]))
         std = np.sqrt(np.diag(cov))
         
@@ -66,3 +94,72 @@ def get_fits(data, channel='norm', function='biexp'):
         ax.set_ylim(1,np.max(out[channel][:]))
 
     return fits
+
+def plot_transients(data, **kwargs):
+    params = {}
+    params.update(styles.spectra_TRPL)
+    params.update(**kwargs)
+    
+    spectra.plot_spectra(data, **params)
+
+def remove_dark_counts(data, channel, time_range, name=None):
+    channel = get_channels(data,channel)[0]
+    k = np.average(roi(data,{0:time_range},return_arrs=True)[channel])
+    if name is None:
+        name = f"{channel}_nodark"
+    data.create_channel(name, values=data[channel].points-k)
+    set_label(data,name,"PL intensity (a.u.)")
+
+def compute_biexponential_fit(data, channel, axis=0, IRF=None, bounds=None):
+    def biexp(t,a1,t1,a2,t2,offset):
+        return np.heaviside(t-offset,1) * (a1*np.exp(-(t-offset)/t1)+a2*np.exp(-(t-offset)/t2))
+    def convolved_biexp(t,a1,t1,a2,t2,offset,airf):
+        return np.convolve((np.heaviside(t-offset,1) * (a1*np.exp(-(t-offset)/t1)+a2*np.exp(-(t-offset)/t2))),airf*IRF,mode='same')
+    
+    axis, channel = get_axes(data, axis)[0], get_channels(data, channel)[0]
+    t_arr, sig_arr = data[axis].points, data[channel].points
+    t_arr -= t_arr[np.argmax(sig_arr)]
+    maxfev = t_arr.size*1000000
+    if bounds is None:
+        a1bounds, a2bounds = (0.01*np.max(sig_arr),np.max(sig_arr)), (0.01*np.max(sig_arr),np.max(sig_arr))
+        t1bounds, t2bounds = (0,np.max(t_arr)/2), (0,np.max(t_arr))
+        airfbounds = (0.04,0.06)
+        t_range = np.max(t_arr)-np.min(t_arr)
+        offset_bounds = (-0.1*t_range, 0.1*t_range)
+        bounds = ([a1bounds[0],t1bounds[0],a2bounds[0],t2bounds[0],offset_bounds[0]],[a1bounds[1],t1bounds[1],a2bounds[1],t2bounds[1],offset_bounds[1]])
+    print(f'{bounds}')
+    if IRF is not None:
+        bounds = ([a1bounds[0],t1bounds[0],a2bounds[0],t2bounds[0],offset_bounds[0],airfbounds[0]],[a1bounds[1],t1bounds[1],a2bounds[1],t2bounds[1],offset_bounds[1],airfbounds[1]])
+        fit, cov = curve_fit(convolved_biexp, t_arr, sig_arr, bounds=bounds, maxfev=maxfev)
+        fit_arr = convolved_biexp(t_arr, *fit)
+        fit_type = "simple biexponential"
+    else:
+        fit, cov = curve_fit(biexp, t_arr, sig_arr, bounds=bounds, maxfev=maxfev)
+        fit_arr = biexp(t_arr, *fit)
+        fit_type = "biexponential convolved with IRF"
+    err = np.sqrt(np.diag(cov))
+    print(f"{fit_arr.size}, {sig_arr.size}")
+
+    fit_dict = {
+        'a1' : (fit[0],err[0]),
+        't1' : (fit[1],err[1]),
+        'a2' : (fit[2],err[2]),
+        't2' : (fit[3], err[3]),
+        'offset' : (fit[-1],err[-1]),
+        'r2': pearsonr(fit_arr,sig_arr)[0]**2
+    }
+    if IRF is not None:
+        fit_dict['aIRF'] = (fit[4],err[4])
+    print(f"{fit_dict}")
+
+    data.create_channel(f"fit_{channel}", values=fit_arr)
+    set_label(data, f"fit_{channel}", "fit magnitude")
+    data[f"fit_{channel}"].attrs['fit'] = str(fit_dict)
+
+    print(f"biexponential fit applied to channel {channel} of data {data.natural_name}:")
+    print(f"fit type: {fit_type}")
+    print(f"fit parameters:")
+    for key, value in fit_dict.items():
+        if key != 'r2':
+            print(f"    {key} : {value[0]} +/- {value[1]}")
+    print(f"    r2 : {fit_dict['r2']}")

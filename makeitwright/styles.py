@@ -1,71 +1,34 @@
 __name__ = "styles"
 __author__ = "Chris Roy, Song Jin Research Group, Dept. of Chemistry, University of Wisconsin - Madison"
-__version__ = 0.0
 
 import matplotlib as mpl
 import cmocean
 
-def __merge(*dicts):
-    merged = {}
-    for d in dicts:
-        merged.update(d)
-    return merged
+beckerhickl_transient = {
+    "xlabel" : "time (ns)",
+    "vreflines" : 0,
+    "marker" : '.',
+    "markersize" : 3
+    }
 
 profile = {
-    "fig_width" : 6.5,
-    "fig_height" : 6.5,
+    "fig_width" : 4,
+    "fig_height" : 3,
     "cmap" : mpl.cm.viridis,
-    "xlabel" : "spectrum (a.u.)",
-    "ylabel" : "y (a.u.)",
-    "cbar_label" : "signal (a.u.)",
-    "ticks" : 'auto'
+    "xlabel" : None,
+    "ylabel" : None,
+    "cbar_label" : None,
+    "cbar_ticks" : None
     }
 
 profile_andor = {
-    "fig_width" : 6.5,
-    "fig_height" : 3.5,
-    "ticks" : 'auto'
-    }
-
-profile_andor_A = profile_andor|{
-    "cmap" : cmocean.cm.dense,
-    "xlabel" : "wavelength (nm)",
-    "ylabel" : "y (µm)",
-    "cbar_label" : "absorbance"
-    }
-
-profile_andor_PL = profile_andor|{
-    "cmap" : mpl.cm.viridis,
-    "xlabel" : "wavelength (nm)",
-    "ylabel" : "y (µm)",
-    "cbar_label" : "PL intensity (cps)"
-    }
-
-profile_andor_R = profile_andor|{
-    "cmap" : mpl.cm.magma,
-    "xlabel" : "wavelength (nm)",
-    "ylabel" : "y (µm)",
-    "cbar_label" : "reflectance"
-    }
-
-profile_andor_RR0 = profile_andor|{
-    "cmap" : mpl.cm.RdBu_r,
-    "xlabel" : "wavelength (nm)",
-    "ylabel" : "y (µm)",
-    "cbar_label" : 'reflection contrast'
-    } 
-
-
-profile_andor_T = profile_andor|{
-    "cmap" : cmocean.cm.ice,
-    "xlabel" : "wavelength (nm)",
-    "ylabel" : "y (µm)",
-    "cbar_label" : "transmittance"
+    "fig_width" : 4,
+    "fig_height" : 3
     }
 
 profile_horiba = {
     "fig_width" : 6.5,
-    "ticks" : 'auto'
+    "cbar_ticks" : None
     }
 
 profile_horiba_PL = profile_horiba|{
@@ -99,32 +62,24 @@ profile_iontof = {
     "xlabel" : "distance (µm)",
     "ylabel" : "sputtering time (s)",
     "cbar_label" : "SI counts",
-    "ticks" : 'auto'
+    "cbar_ticks" : None
     }
 
 image = {
-    "fig_width" : 6.5,
-    "fig_height" : 6.5,
+    "fig_width" : 4,
+    "fig_height" : 4,
     "cmap" : mpl.cm.Greys_r,
-    "xlabel" : "spectrum (a.u.)",
-    "ylabel" : "y (a.u.)",
+    "xlabel" : None,
+    "ylabel" : None,
     "cbar_label" : "signal (a.u.)",
     "ticks" : 'auto'
     }
 
 image_andor = {
-    "fig_width" : 6.5,
-    "fig_height" : 6.5,
-    "xlabel" : "x (µm)",
-    "ylabel" : "y (µm)"
-    }
-
-image_andor_R = image_andor|{
-    "cmap" : mpl.cm.magma
-    }
-
-image_andor_T = image_andor|{
-    "cmap" : cmocean.cm.ice
+    "fig_width" : 4,
+    "fig_height" : 4,
+    "xlabel" : None,
+    "ylabel" : None
     }
 
 image_horiba = {

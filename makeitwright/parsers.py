@@ -1,17 +1,13 @@
 __name__ = "parsers"
-__author__ = 'Chris R. Roy, Song Jin Research Group, Dept. of Chemistry, University of Wisconsin-Madison'
-__version__ = 0.0
+__author__ = "Chris Roy, Song Jin Research Group, Dept. of Chemistry, University of Wisconsin - Madison"
 
 from psutil import virtual_memory
 from os import listdir
 from os.path import isfile, isdir, getsize
+import andor, beckerhickl, horiba, iontof, xrd, afm
 import WrightTools as wt
 
-from makeitwright.process.afm import from_Gwyddion_traces
-from makeitwright.process.xrd import from_Bruker_XRD
-from makeitwright.process.iontof import ITApeaks
-
-def typeID(*fpaths):
+def typeID(*fpaths, sorted=False):
     types = {}
     identified = 0
     for fpath in fpaths:
@@ -24,8 +20,9 @@ def typeID(*fpaths):
             with open(fpath) as f:
                 txt = f.read()
             if "LabRAM HR" in txt:
-                types[fpath] = 'LabRAM'
-                identified+=1
+                if horiba.typeID(fpath) is not None:
+                    types[fpath] = horiba.typeID(fpath)
+                    identified+=1
             if "Goniometer" in txt:
                 types[fpath] = 'Bruker_XRD'
                 identified+=1
@@ -64,7 +61,7 @@ def listfiles(fdir, flist=[]):
         print("Too many files in directory. Process terminated to prevent overflow.")
     
 
-def parse(fdir, select_types=None, keywords=[], exclude=[]):
+def parse(fdir, objective, select_types=None, keywords=[], exclude=[]):
     files = listfiles(fdir)
     
     include = [1 for i in range(len(files))]
@@ -100,7 +97,8 @@ def parse(fdir, select_types=None, keywords=[], exclude=[]):
             print(f'excluded {num_removed} files that did not match specified data type(s)')
     
     if 'ASCII' in ftypes.values():
-        objective = input(f'Enter objective lens magnification if all data in this directory used the same lens. Otherwise, press enter: ')
+        if not objective:
+            objective = input(f'Enter objective lens magnification if all data in this directory used the same lens. Otherwise, press enter: ')
         if not objective:
             objective = 'prompt'
 
@@ -120,35 +118,43 @@ def parse(fdir, select_types=None, keywords=[], exclude=[]):
         for fpath, dtype in ftypes.items():
             basename = fpath.split('/')[-1].split('.')[0]
 
-            if dtype=='LabRAM':
-                d.append(wt.data.from_LabRAM(fpath, name=basename))
+            if dtype=='LabramHR_spectrum':
+                d.append(horiba.fromLabramHR(fpath, name=basename))
+
+            if dtype=='LabramHR_linescan':
+                d.append(horiba.fromLabramHR(fpath, name=basename))
+
+            if dtype=='LabramHR_map':
+                d.append(horiba.fromLabramHR(fpath, name=basename))
 
             if dtype=='Bruker_XRD':
                 l0 = len(d)
-                d = d + from_Bruker_XRD(fpath, name=basename)
+                d = d + xrd.fromBruker(fpath)
                 l1 = len(d)-l0
 
             if dtype=='Gwyddion_traces':
-                d.append(from_Gwyddion_traces(fpath, name=basename))
+                d.append(afm.fromGwyddion_traces(fpath, name=None, ID_steps=True))
 
             if dtype=='iontof_SIMS':
-                d.append((fpath, ITApeaks(fpath)))
+                d.append((fpath, iontof.ITApeaks(fpath)))
 
             if dtype=='TRPL':
                 l0 = len(d)
-                d.append(wt.data.from_spcm(fpath, name=basename))
+                d.append(beckerhickl.fromSP130(fpath, name=basename))
                 l1 = len(d)-l0
+                print(basename)
 
             if dtype=='ASCII':
                 try:
-                    d.append(wt.data.from_Solis(fpath, name=basename))
-                    print(basename)
+                    d.append(andor.fromAndorNeo(fpath, name=basename, objective_lens=objective))
                 except:
                     print(f'attempted to extract ASCII data from path <{fpath}> but it was not recognized by the andor module')
+                print(basename)
             
             if dtype=='wt5':
                 d.append(wt.open(fpath))
-
+        if len(d)==1:
+            d=d[0]
         return d
     else:
         print("too much data in directory, parsing cancelled to prevent storage overflow")
