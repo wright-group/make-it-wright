@@ -30,3 +30,8 @@ classifiers = [
 
 [project.optional-dependencies]
 iontof = ["pySPM"]
+
+[tool.pytest.ini_options]
+testpaths = [
+    "tests",
+]
