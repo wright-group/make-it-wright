@@ -26,8 +26,8 @@ def typeID(*fpaths):
             with open(fpath) as f:
                 txt = f.read()
             if "LabRAM HR" in txt:
-                if horiba.typeID(fpath) is not None:
-                    types[fpath] = horiba_typeID(fpath)
+                if (htype := horiba_typeID(fpath)) is not None:
+                    types[fpath] = htype
             if "Goniometer" in txt:
                 types[fpath] = 'Bruker_XRD'
             if "[m]" in txt:

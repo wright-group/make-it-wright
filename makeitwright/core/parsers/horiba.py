@@ -123,7 +123,7 @@ def fromLabramHR(filepath, name=None, cps=False):
                 spect['wl'].label = spectlabels[spectral_units]
                 spect.create_channel(name='sig', values=sig_i)
                 spect['sig'].label = siglabels[spectral_units]
-                spect.create_channel(name='norm', values=helpers.norm(sig_i, 0, 1))
+                spect.create_channel(name='norm', values=norm(sig_i, 0, 1))
                 spect['norm'].label = 'norm. ' + siglabels[spectral_units].split(' (')[0]
                 spect.transform('wl')
                 spect.attrs['dtype'] = 'spectrum'

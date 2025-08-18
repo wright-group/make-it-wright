@@ -2,14 +2,14 @@
 # Process Reflectance/Transmittance/Absorbance Data from Wright group Microscope
 
 import pathlib
-import makeitwright as miw
+import makeitwright as mw
 import matplotlib as mpl
 
-# import makeitwright.process.andor as andor
-# from makeitwright.process.helpers import roi
-# from makeitwright.parsers import parse
-# from makeitwright.artists import setparams, setdpi
-# from makeitwright.spectra import plot_spectra as plot
+
+andor = mw.andor
+roi = mw.helpers.roi
+parse = mw.parsers.parse
+plot = mw.spectra.plot_spectra
 
 
 mpl.rc(dpi=150)
