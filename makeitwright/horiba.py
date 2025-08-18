@@ -1,8 +1,8 @@
 import numpy as np
 import WrightTools as wt
-import makeitwright.lib.styles as styles
+import makeitwright.core.styles as styles
 
-from .lib import spectralprofile, hyperspectral
+from .core import spectralprofile, hyperspectral
 
 def central_wavelength(data):
     raise NotImplementedError

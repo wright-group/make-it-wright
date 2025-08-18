@@ -1,6 +1,6 @@
 import numpy as np
 import cmocean
-from .lib import hyperspectral, styles, helpers
+from .core import hyperspectral, styles, helpers
 
 
 def relative_proportion(data, channel0, channel1):

@@ -1,15 +1,12 @@
-__name__ = "beckerhickl"
-__author__ = "Chris Roy, Song Jin Research Group, Dept. of Chemistry, University of Wisconsin - Madison"
-
 import numpy as np
 import matplotlib.pyplot as plt
 import WrightTools as wt
 from scipy.optimize import curve_fit
 from scipy.stats import pearsonr
 
-from .lib.helpers import get_axes, get_channels, set_label, roi
-from .lib import spectra
-from .lib import styles
+from .core.helpers import get_axes, get_channels, set_label, roi
+from .core import spectra
+from .core import styles
 
 
 

@@ -1,5 +1,5 @@
 from .__version__ import *
-from .lib import *
+from .core import *
 
 from . import andor
 from . import beckerhickl

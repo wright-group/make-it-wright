@@ -3,8 +3,8 @@ from matplotlib import pyplot as plt
 from scipy.optimize import curve_fit
 from scipy.stats import pearsonr
 import WrightTools as wt
-from .lib import spectra, styles
-from .lib.helpers import norm, roi
+from .core import spectra, styles
+from .core.helpers import norm, roi
 
 
 pi = np.pi

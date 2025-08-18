@@ -1,9 +1,9 @@
 import warnings
 import numpy as np
 
-from .lib import image, spectralprofile, styles
-from .lib.helpers import roi, set_label, get_channels
-import makeitwright.lib.styles as styles
+from .core import image, spectralprofile, styles
+from .core.helpers import roi, set_label, get_channels
+import makeitwright.core.styles as styles
 
 
 APD_PIXEL = (1325, 1080)
