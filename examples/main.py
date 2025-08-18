@@ -1,11 +1,12 @@
 import matplotlib as mpl
 from pathlib import Path
 
-from makeitwright.process import andor
+import makeitwright as mw
 
-from makeitwright.process.helpers import show, roi, set_label
-from makeitwright.parsers import parse
-from makeitwright.artists import plot
+andor = mw.andor
+roi = mw.helpers.roi
+parse = mw.parsers.parse
+plot = mw.artists.plot
 
 
 user_path = Path().expanduser().resolve()
