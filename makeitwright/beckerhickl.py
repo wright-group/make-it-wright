@@ -9,8 +9,6 @@ from .core import spectra
 from .core import styles
 
 
-
-
 def get_fits(data, channel='norm', function='biexp'):
     def exp(t, a, td):
         return a*np.exp(-t/td)     

@@ -1,5 +1,3 @@
-import numpy as np
-import WrightTools as wt
 import makeitwright.core.styles as styles
 
 from .core import spectralprofile, hyperspectral

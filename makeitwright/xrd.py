@@ -7,14 +7,11 @@ from .core import spectra, styles
 from .core.helpers import norm, roi
 
 
-pi = np.pi
-
-
 def get_fits(data, channel='norm', function='gauss', xrange='all'):
     def gauss(x, a, u, s):
         return a*np.exp(-((x-u)/(2*s))**2)
     def cauchy(x, a, u, s):
-        return a/(pi*s*(1+((x-u)/s)**2))     
+        return a/(np.pi*s*(1+((x-u)/s)**2))     
     
     functions = {
         'gauss' : gauss,

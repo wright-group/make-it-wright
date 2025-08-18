@@ -10,7 +10,6 @@ repos:
     rev: v5.0.0
     hooks:
       - id: trailing-whitespace
-        exclude: datasets|.csv$
       - id: no-commit-to-branch
         args: [-b master]
 
