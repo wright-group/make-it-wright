@@ -1,0 +1,32 @@
+[build-system]
+requires = ["flit_core >= 3.12.0, <4"]
+build-backend = "flit_core.buildapi"
+
+[project]
+name = "makeitwright"
+description = "Plotting and parsing tools for the Jin Group."
+authors = [{name="Chris Roy"}]
+maintainers = [{name="Dan Kohler"}]
+dynamic = ["version"]
+requires-python = ">=3.7"
+readme = "README.md"
+dependencies = [
+    "psutil",
+    "wrighttools",
+    "cmocean",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",
+    "Natural Language :: English",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Topic :: Scientific/Engineering",
+]
+
+[project.optional-dependencies]
+iontof = ["pySPM"]
