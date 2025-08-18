@@ -5,7 +5,8 @@ import makeitwright.lib.styles as styles
 from .lib import spectralprofile, hyperspectral
 
 def central_wavelength(data):
-    pass
+    raise NotImplementedError
+
 
 def plot_image(data, channel, **kwargs):
     params = {}
@@ -23,6 +24,7 @@ def plot_image(data, channel, **kwargs):
         hyperspectral.plot_image(data, channel, **params)
     else:
         spectralprofile.plot_image(data, channel, **params)
+
 
 def plot_profile(data, channel, profile_axis='y', **kwargs):
     params = {}
@@ -44,6 +46,7 @@ def plot_profile(data, channel, profile_axis='y', **kwargs):
     else:
         spectralprofile.plot_profile(data, channel, **params)
     
+
 def plot_decomposition(data, channel, **kwargs):
     params = {}
     try:

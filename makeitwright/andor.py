@@ -1,7 +1,7 @@
 import warnings
 import numpy as np
 
-from .lib import image, spectralprofile
+from .lib import image, spectralprofile, styles
 from .lib.helpers import roi, set_label, get_channels
 import makeitwright.lib.styles as styles
 
@@ -275,7 +275,7 @@ def compute_reflection_contrast(sample_data, reference_data,
 def compute_transmittance(sample_data, reference_data, 
                             sample_channel=0, reference_channel=0,
                             dark_reference_data=None, dark_reference_channel=0,
-                            dark_wavelength_range=[0, CMOS_RESPONSE_CUTOFF_NM],
+                            dark_wavelength_range=[0, config["CMOS_RESPONSE_CUTOFF_NM"]],
                             background_ROI=None):
     """
     Determine the spectral transmittance of a sample using the spectral transmittance of the substrate underneath.

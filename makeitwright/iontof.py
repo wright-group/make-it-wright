@@ -45,6 +45,7 @@ def relative_proportion(data, channel0, channel1):
     data.create_channel(ch_name, values=ch_arr, verbose=True)
     data[ch_name].signed = True
 
+
 def plot_image(data, channel, **kwargs):
     
     params = {}
@@ -55,6 +56,7 @@ def plot_image(data, channel, **kwargs):
 
     hyperspectral.plot_image(data, channel, **params)
 
+
 def plot_profile(data, profile_axis, channel, **kwargs):
     
     params = {}
@@ -64,6 +66,7 @@ def plot_profile(data, profile_axis, channel, **kwargs):
     params.update(**kwargs)
     
     hyperspectral.plot_profile(data, profile_axis, channel, **params)
+
 
 def plot_depth_trace(data, channel, **kwargs):
     
