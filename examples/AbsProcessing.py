@@ -1,5 +1,5 @@
 
-# Process Reflectance/Transmittance/Absorbance Data from Wright group
+# Process Reflectance/Transmittance/Absorbance Data from Wright group Microscope
 
 import pathlib
 import makeitwright.process.andor as andor

@@ -7,15 +7,9 @@ import WrightTools as wt
 from scipy.optimize import curve_fit
 from scipy.stats import pearsonr
 
-from . import helpers
-import makeitwright.spectra as spectra
-import makeitwright.styles as styles
-
-
-get_axes = helpers.get_axes
-get_channels = helpers.get_channels
-set_label = helpers.set_label
-roi = helpers.roi
+from .lib.helpers import get_axes, get_channels, set_label, roi
+import makeitwright.lib.spectra as spectra
+import makeitwright.lib.styles as styles
 
 
 def fromSP130(fpath, name=None):
