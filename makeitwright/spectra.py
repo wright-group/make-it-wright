@@ -1,12 +1,11 @@
+"""plotting routines for 1D data"""
+
 import numpy as np
 import WrightTools as wt
 from matplotlib import pyplot as plt
 from .process import helpers
 from . import styles
 
-"""
-Data objects with one axis alone
-"""
 
 def plot_spectra(data, **kwargs):
     if type(data) is wt.Collection:

@@ -1,4 +1,4 @@
-import matplotlib as mpl
+import matplotlib.cm as cm
 import cmocean
 
 
@@ -12,7 +12,7 @@ beckerhickl_transient = {
 profile = {
     "fig_width" : 4,
     "fig_height" : 3,
-    "cmap" : mpl.cm.viridis,
+    "cmap" : cm.viridis,
     "xlabel" : None,
     "ylabel" : None,
     "cbar_label" : None,
@@ -31,7 +31,7 @@ profile_horiba = {
 
 profile_horiba_PL = profile_horiba|{
     "fig_height" : 6.5,
-    "cmap" : mpl.cm.viridis,
+    "cmap" : cm.viridis,
     "xlabel" : "wavelength (nm)",
     "ylabel" : "y (µm)",
     "cbar_label" : "PL intensity (cps)"
@@ -39,7 +39,7 @@ profile_horiba_PL = profile_horiba|{
 
 profile_horiba_Raman = profile_horiba|{
     "fig_height" : 6.5,
-    "cmap" : mpl.cm.inferno,
+    "cmap" : cm.inferno,
     "xlabel" : "Raman shift (cm\u207b\u2071)",
     "ylabel" : "y (µm)",
     "cbar_label" : "scattering intensity (cps)"
@@ -47,7 +47,7 @@ profile_horiba_Raman = profile_horiba|{
 
 profile_horiba_timed_series = profile_horiba|{
     "fig_height" : 10,
-    "cmap" : mpl.cm.viridis,
+    "cmap" : cm.viridis,
     "xlabel" : "wavelength (nm)",
     "ylabel" : "excitation time (s)",
     "cbar_label" : "PL intensity (cps)"
@@ -66,7 +66,7 @@ profile_iontof = {
 image = {
     "fig_width" : 4,
     "fig_height" : 4,
-    "cmap" : mpl.cm.Greys_r,
+    "cmap" : cm.Greys_r,
     "xlabel" : None,
     "ylabel" : None,
     "cbar_label" : "signal (a.u.)",
@@ -87,14 +87,14 @@ image_horiba = {
     }
 
 image_horiba_PL = image_horiba|{
-    "cmap" : mpl.cm.viridis,
+    "cmap" : cm.viridis,
     "xlabel" : "x (µm)",
     "ylabel" : "y (µm)",
     "cbar_label" : "PL intensity (cps)"
     }
 
 image_horiba_Raman = image_horiba|{
-    "cmap" : mpl.cm.inferno,
+    "cmap" : cm.inferno,
     "xlabel" : "x (µm)",
     "ylabel" : "y (µm)",
     "cbar_label" : "scattering intensity (cps)"
@@ -189,7 +189,7 @@ spectra = {
     "marker" : '.',
     "alpha" : 1,
     "marker_size" : 5,
-    "colors" : mpl.cm.Set1,
+    "colors" : cm.Set1,
     "xlabel" : None,
     "ylabel" : None
     }
@@ -199,7 +199,7 @@ spectra_TRPL = spectra|{
     "yscale" : "log",
     "xlabel" : "t (ns)",
     "ylabel" : "norm. counts",
-    "colors" : mpl.cm.Set2,
+    "colors" : cm.Set2,
     "marker" : '.',
     "marker_size" : 3,
     "reference_lines" : 0
@@ -209,7 +209,7 @@ spectra_XRD_pattern = spectra|{
     "fig_height" : 3,
     "marker" : 'o',
     "marker_size" : 3,
-    "colors" : mpl.cm.Set1,
+    "colors" : cm.Set1,
     "xlabel" : "diffraction angle (deg. 2\u03B8)",
     "ylabel" : "intensity (a.u.)"
     }

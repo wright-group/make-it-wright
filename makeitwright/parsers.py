@@ -1,16 +1,25 @@
 from psutil import virtual_memory
 from os import listdir
 from os.path import isfile, isdir, getsize
-from .process import andor, beckerhickl, horiba, iontof, xrd, afm
-import WrightTools as wt
 
-def typeID(*fpaths, sorted=False):
+from .process import afm, andor, beckerhickl, horiba, xrd
+try:  # iontof is optional
+    from .process import iontof
+except ImportError:
+    pass
+import WrightTools as wt
+import numpy as np
+
+
+def typeID(*fpaths):
+    """
+    Infer what kind of data the file contains.
+    The kind will inform on how to correctly import the data.
+    """
     types = {}
-    identified = 0
     for fpath in fpaths:
         if '.ita' in fpath:
             types[fpath] = 'iontof_SIMS'
-            identified+=1
             print(f"file {fpath} is IonToF SIMS data")
             
         if '.txt' in fpath:
@@ -19,30 +28,25 @@ def typeID(*fpaths, sorted=False):
             if "LabRAM HR" in txt:
                 if horiba.typeID(fpath) is not None:
                     types[fpath] = horiba.typeID(fpath)
-                    identified+=1
             if "Goniometer" in txt:
                 types[fpath] = 'Bruker_XRD'
-                identified+=1
             if "[m]" in txt:
                 types[fpath] = 'Gwyddion_traces'
-                identified+=1
 
         if '.asc' in fpath:
             with open(fpath) as f:
                 txt = f.read()
             if "*BLOCK" in txt:
                 types[fpath] = 'TRPL'
-                identified+=1
             else:
                 types[fpath] = 'ASCII'
-                identified+=1
 
         if '.wt5' in fpath:
             types[fpath] = 'wt5'
-            identified+=1
 
-    print(f"{identified} of {len(fpaths)} files identified as valid data types")
+    print(f"{len(types)} of {len(fpaths)} files identified as valid data types")
     return types
+
 
 def listfiles(fdir, flist=[]):
     if len(flist) < 1000:
@@ -58,7 +62,7 @@ def listfiles(fdir, flist=[]):
         print("Too many files in directory. Process terminated to prevent overflow.")
     
 
-def parse(fdir, objective, select_types=None, keywords=[], exclude=[]):
+def parse(fdir, objective, select_types=None, keywords:list|str=[], exclude=[]):
     files = listfiles(fdir)
     
     include = [1 for i in range(len(files))]
@@ -115,40 +119,32 @@ def parse(fdir, objective, select_types=None, keywords=[], exclude=[]):
         for fpath, dtype in ftypes.items():
             basename = fpath.split('/')[-1].split('.')[0]
 
-            if dtype=='LabramHR_spectrum':
+            if dtype.startswith('LabramHR'):
                 d.append(horiba.fromLabramHR(fpath, name=basename))
 
-            if dtype=='LabramHR_linescan':
-                d.append(horiba.fromLabramHR(fpath, name=basename))
-
-            if dtype=='LabramHR_map':
-                d.append(horiba.fromLabramHR(fpath, name=basename))
-
-            if dtype=='Bruker_XRD':
+            elif dtype=='Bruker_XRD':
                 l0 = len(d)
                 d = d + xrd.fromBruker(fpath)
-                l1 = len(d)-l0
 
-            if dtype=='Gwyddion_traces':
+            elif dtype=='Gwyddion_traces':
                 d.append(afm.fromGwyddion_traces(fpath, name=None, ID_steps=True))
 
-            if dtype=='iontof_SIMS':
+            elif dtype=='iontof_SIMS':
                 d.append((fpath, iontof.ITApeaks(fpath)))
 
-            if dtype=='TRPL':
+            elif dtype=='TRPL':
                 l0 = len(d)
                 d.append(beckerhickl.fromSP130(fpath, name=basename))
-                l1 = len(d)-l0
                 print(basename)
 
-            if dtype=='ASCII':
+            elif dtype=='ASCII':
                 try:
                     d.append(andor.fromAndorNeo(fpath, name=basename, objective_lens=objective))
                 except:
                     print(f'attempted to extract ASCII data from path <{fpath}> but it was not recognized by the andor module')
                 print(basename)
             
-            if dtype=='wt5':
+            elif dtype=='wt5':
                 d.append(wt.open(fpath))
         if len(d)==1:
             d=d[0]

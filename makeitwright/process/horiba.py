@@ -1,12 +1,10 @@
-__name__ = "horiba"
-__author__ = "Chris Roy, Song Jin Research Group, Dept. of Chemistry, University of Wisconsin - Madison"
-
 import numpy as np
 import WrightTools as wt
-import spectralprofile
-import hyperspectral
-import processhelpers as proc
-import styles
+import makeitwright.styles as styles
+
+from . import spectralprofile
+from . import hyperspectral
+from . import helpers
 
 def central_wavelength(data):
     pass
@@ -68,7 +66,8 @@ def plot_decomposition(data, channel, **kwargs):
 def fromAramis(filepath):
     print("not ready yet, get to work :)")
 
-def typeID(filepath):
+
+def horiba_typeID(filepath):
     with open(filepath) as f:
         txt = f.readlines()
     header_size = 0
@@ -100,6 +99,7 @@ def typeID(filepath):
         dtype = 'LabramHR_map'
         
     return dtype
+
 
 def fromLabramHR(filepath, name=None, cps=False):
     if name is None:
@@ -157,7 +157,7 @@ def fromLabramHR(filepath, name=None, cps=False):
         d['wl'].label = spectlabels[spectral_units]
         d.create_channel('sig', values=sig)
         d['sig'].label = siglabels[spectral_units]
-        d.create_channel('norm', values=proc.norm(sig, 0, 1))
+        d.create_channel('norm', values=helpers.norm(sig, 0, 1))
         d['norm'].label = 'norm. ' + siglabels[spectral_units].split(' (')[0]
         d.transform('wl')
         d.attrs['dtype'] = 'spectrum'
@@ -187,7 +187,7 @@ def fromLabramHR(filepath, name=None, cps=False):
                 spect['wl'].label = spectlabels[spectral_units]
                 spect.create_channel(name='sig', values=sig_i)
                 spect['sig'].label = siglabels[spectral_units]
-                spect.create_channel(name='norm', values=proc.norm(sig_i, 0, 1))
+                spect.create_channel(name='norm', values=helpers.norm(sig_i, 0, 1))
                 spect['norm'].label = 'norm. ' + siglabels[spectral_units].split(' (')[0]
                 spect.transform('wl')
                 spect.attrs['dtype'] = 'spectrum'

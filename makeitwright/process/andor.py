@@ -72,15 +72,15 @@ def fromAndorNeo(fpath, name=None, objective_lens='prompt', cps=False):
     """
 
     objective_lenses = {
-    '5x-Jin' : 0.893,
-    '20x-Jin' : 3.52, 
-    '100x-Wright' : 18.2,
-    '5' : 0.893,
-    '20' : 3.52,
-    '100' : 18.2,
-    5 : 0.893,
-    20 : 3.52,
-    100 : 18.2
+        '5x-Jin' : 0.893,
+        '20x-Jin' : 3.52, 
+        '100x-Wright' : 18.2,
+        '5' : 0.893,
+        '20' : 3.52,
+        '100' : 18.2,
+        5 : 0.893,
+        20 : 3.52,
+        100 : 18.2
     }
 
     # parse filepath

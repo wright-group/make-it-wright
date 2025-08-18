@@ -1,12 +1,8 @@
-__name__ = "image"
-__author__ = "Chris Roy, Song Jin Research Group, Dept. of Chemistry, University of Wisconsin - Madison"
-
-#import
 import numpy as np
 import matplotlib as mpl
 from matplotlib import pyplot as plt
-import processhelpers as proc
-import styles 
+from . import helpers
+import makeitwright.styles as styles 
 
 def get_pixel_location(data, pixel):
     """
@@ -24,7 +20,7 @@ def get_pixel_location(data, pixel):
     return (data.axes[0].points[pixel[0]], data.axes[1].points[pixel[1]])
 
 def remove_background(data, channel, threshold=0.5, negative=False, return_mask=False, max_ref_count=500):
-    channel, = proc.parse_args(data, channel, dtype='Channel')
+    channel, = helpers.parse_args(data, channel, dtype='Channel')
         
     ch_arr = data[channel][:]
     if max_ref_count > ch_arr.size:
@@ -44,7 +40,7 @@ def remove_background(data, channel, threshold=0.5, negative=False, return_mask=
 
 def plot_image(data, channel, **kwargs):
     #convert axis/channel indices to natural names
-    channel, = proc.parse_args(data, channel, dtype='Channel') 
+    channel, = helpers.parse_args(data, channel, dtype='Channel') 
 
     #set parameters for plotting from kwargs
     params = {
@@ -63,7 +59,7 @@ def plot_image(data, channel, **kwargs):
     
     #extract ROI
     if params["ROI"] is not None:
-        out = proc.roi(data, params["ROI"])
+        out = helpers.roi(data, params["ROI"])
     else:
         out = data
 
@@ -82,9 +78,9 @@ def plot_image(data, channel, **kwargs):
     #determine range to be plotted
     if params["vrange"] is None:
         if params["contrast"] is None:
-            vrange = proc.get_range(out, reference_key=channel)
+            vrange = helpers.get_range(out, reference_key=channel)
         else:
-            vrange = proc.contrast(out, channel, params["contrast"])
+            vrange = helpers.contrast(out, channel, params["contrast"])
     else:
         vrange = params["vrange"]
     

@@ -15,8 +15,8 @@ Data axes must be ordered (spatial x, spatial y, non-spatial).
 import numpy as np
 import matplotlib as mpl
 from matplotlib import pyplot as plt
-import processhelpers as proc
-import styles
+from . import helpers
+import makeitwright.styles as styles
 
 def remove_background(data, channel, threshold=0.1, negative=False, return_mask=False, max_ref_count=10):
     """
@@ -45,7 +45,7 @@ def remove_background(data, channel, threshold=0.1, negative=False, return_mask=
         Adds a background-subtracted channel to the Data instance.
     """
     #parse channel argument as str
-    channel, = proc.parse_args(data, channel, dtype='Channel')
+    channel, = helpers.parse_args(data, channel, dtype='Channel')
     
     #generate a spectrally binned image of the channel
     ch_arr = np.sum(data[channel][:], axis=2)
@@ -76,7 +76,7 @@ def get_profile(data, profile_axis, ROI=None):
     data: WrightTools Data instance. Must have at least 3 axes.
     ROI should be a dict object containing the beginning and end points for each relevant axis, returns data object
     """
-    profile_axis, = proc.parse_args(data, profile_axis)
+    profile_axis, = helpers.parse_args(data, profile_axis)
     non_profile_axis = [axis.natural_name for axis in data.axes if axis.natural_name != profile_axis][0]
     spectral_axis = [axis.natural_name for axis in data.axes if axis.natural_name != profile_axis][1]
 
@@ -96,11 +96,11 @@ def get_profile(data, profile_axis, ROI=None):
             print("Dimensionality of ROI is too low. Do not collapse any dimensions of the data before calling this method.")
             return
         if not dims_too_low:
-            out = proc.roi(data, ROI)
+            out = helpers.roi(data, ROI)
     else:
         out = data
     if len(out.axes) > 2:
-        out = proc.roi(out, {non_profile_axis:'all'})
+        out = helpers.roi(out, {non_profile_axis:'all'})
     
     out.transform()
     
@@ -124,7 +124,7 @@ def get_profile(data, profile_axis, ROI=None):
 def plot_image(data, channel, **kwargs):
     
     #convert axis/channel indices to natural names
-    channel, = proc.parse_args(data, channel, dtype='Channel')
+    channel, = helpers.parse_args(data, channel, dtype='Channel')
     non_spatial_axis = data.axes[-1].natural_name
 
     #set parameters for plotting from kwargs
@@ -141,15 +141,15 @@ def plot_image(data, channel, **kwargs):
     
     #extract ROI
     if params["ROI"] is not None:
-        out = proc.roi(data, params["ROI"])
+        out = helpers.roi(data, params["ROI"])
         if len(out.axes) != 2:
-            out = proc.roi(out, {non_spatial_axis : 'all'})
+            out = helpers.roi(out, {non_spatial_axis : 'all'})
     else:
-        out = proc.roi(data, {non_spatial_axis : 'all'})
+        out = helpers.roi(data, {non_spatial_axis : 'all'})
     
     #determine range to be plotted
     if params["vrange"] is None:
-        vrange = proc.get_range(out, reference_key=channel)
+        vrange = helpers.get_range(out, reference_key=channel)
     else:
         vrange = params["vrange"]
     
@@ -181,9 +181,9 @@ def plot_image(data, channel, **kwargs):
 def plot_profile(data, profile_axis, channel, **kwargs):
     
     #convert axis/channel indices to natural names
-    profile_axis, = proc.parse_args(data, profile_axis)
+    profile_axis, = helpers.parse_args(data, profile_axis)
     spectral_axis = data.axes[-1].natural_name
-    channel, = proc.parse_args(data, channel, dtype='Channel')
+    channel, = helpers.parse_args(data, channel, dtype='Channel')
     non_profile_axis = [axis.natural_name for axis in data.axes[:-1] if axis.natural_name != profile_axis][0]
 
     #set parameters for plotting from kwargs
@@ -201,16 +201,16 @@ def plot_profile(data, profile_axis, channel, **kwargs):
     
     #extract ROI
     if params["ROI"] is not None:
-        out = proc.roi(data, params["ROI"])
+        out = helpers.roi(data, params["ROI"])
         if len(out.axes) != 2:
-            out = proc.roi(out, {non_profile_axis : 'all'})
+            out = helpers.roi(out, {non_profile_axis : 'all'})
     else:
-        out = proc.roi(data, {non_profile_axis : 'all'})
+        out = helpers.roi(data, {non_profile_axis : 'all'})
     out.transform(spectral_axis, profile_axis)
 
     #determine range to be plotted
     if params["vrange"] is None:
-        vrange = proc.get_range(out, reference_key=channel)
+        vrange = helpers.get_range(out, reference_key=channel)
     else:
         vrange = params["vrange"]
     
@@ -250,8 +250,8 @@ def plot_profile(data, profile_axis, channel, **kwargs):
     
 def plot_decomposition(data, x_axis, y_axis, spectral_axis, channel, **kwargs):
     #convert axis/channel indices to natural names
-    x_axis, y_axis, spectral_axis = proc.parse_args(data, x_axis, y_axis, spectral_axis)
-    channel, = proc.parse_args(data, channel, dtype='Channel')
+    x_axis, y_axis, spectral_axis = helpers.parse_args(data, x_axis, y_axis, spectral_axis)
+    channel, = helpers.parse_args(data, channel, dtype='Channel')
 
     #set parameters for plotting from kwargs
     params = {
@@ -270,12 +270,12 @@ def plot_decomposition(data, x_axis, y_axis, spectral_axis, channel, **kwargs):
 
     #extract ROI
     if params["ROI"] is not None:
-        out = proc.roi(data, params["ROI"])
+        out = helpers.roi(data, params["ROI"])
     else:
         out = data
       
     #identify spatial ranges for indexing
-    xrange = proc.get_range(out, reference_key=spectral_axis, dtype='Axis')
+    xrange = helpers.get_range(out, reference_key=spectral_axis, dtype='Axis')
 
     #setup plot frame
     fig, ax = plt.subplots(figsize=(params['fig_width'], params['fig_height']))
@@ -287,13 +287,13 @@ def plot_decomposition(data, x_axis, y_axis, spectral_axis, channel, **kwargs):
         if params["binning"] == 'sum':
             arr_out = np.sum(out[channel][:], axis=(0,1))
         #determine range to be plotted
-        vrange = proc.vrange(arr_out, out[channel].signed, window=1)
+        vrange = helpers.vrange(arr_out, out[channel].signed, window=1)
 
         ax.plot(out[spectral_axis].points, arr_out,
             params["marker"], linewidth=params["linewidth"], alpha=1, color=params["color"])
     else:
         #determine range to be plotted
-        vrange = proc.get_range(out, reference_key=channel)
+        vrange = helpers.get_range(out, reference_key=channel)
         for i in range(out[x_axis].size):
             for j in range(out[y_axis].size):
                 if np.sum(out[channel][i,j,:]) != 0:

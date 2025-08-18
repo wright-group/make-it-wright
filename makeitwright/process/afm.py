@@ -4,23 +4,32 @@ import WrightTools as wt
 
 def fromPicoView(filepath, name=None, convert_units=True, flatten_order=0):
     """
-    Does nothing! (under development)
+    under development
     """
-    pass
+    raise NotImplementedError
+
 
 def fromGwyddion_traces(filepath, name=None, convert_units=True, ID_steps=False, flatten=False):
     """
     Generate individual Data objects for a series of traces as exported from Gwyddion workup.
     
-    ---Arguments---
+    Arguments
+    ---------
     filepath - str - The path to where the data is located.
     
-    ---Keyword Arguments---
-    name - str - The base name for the data
-    convert_units - bool - When True, converts the units of x and y into what is anticipated for typpical  AFM topography (um, nm)
-    ID_steps - bool - When True, identifies the most significant topography change in the trace as a "step" and sets that position as 0 in the x array
-    flatten - bool - When True, subtracts the median slope from the y trace
-    ---Returns---
+    Keyword Arguments
+    -----------------
+    name - str - 
+        The base name for the data
+    convert_units - bool - 
+        When True, converts the units of x and y into what is anticipated for typical AFM topography (um, nm)
+    ID_steps - bool - 
+        When True, identifies the most significant topography change in the trace as a "step" and sets that position as 0 in the x array
+    flatten - bool - 
+        When True, subtracts the median slope from the y trace
+
+    Returns
+    -------
     data - WrightTools Data object or list of WrightTools Data objects - the data generated from the file's arrays
     """
     if name is None:

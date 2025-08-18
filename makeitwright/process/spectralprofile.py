@@ -4,7 +4,7 @@
 import numpy as np
 import matplotlib as mpl
 from matplotlib import pyplot as plt
-from . import helpers as ph
+from . import helpers
 import makeitwright.styles as styles
 
 
@@ -25,14 +25,14 @@ def remove_spectral_background(data, channel, spatial_reference_range, name=None
     None - Creates new background-subtracted Channels in the Data instance. 
     """
     #identify channel and categorize axes
-    channel = ph.get_channels(data, channel)[0]
-    spectral_axis = ph.get_axes(data, 0)[0]
-    spatial_axis = ph.get_axes(data, 1)[0]
+    channel = helpers.get_channels(data, channel)[0]
+    spectral_axis = helpers.get_axes(data, 0)[0]
+    spatial_axis = helpers.get_axes(data, 1)[0]
     #construct the background array
     if isinstance(spatial_reference_range, int):
-        spectral_background = ph.roi(data, {spatial_axis:spatial_reference_range}, return_arrs=True)[channel].reshape(data[spectral_axis].shape)
+        spectral_background = helpers.roi(data, {spatial_axis:spatial_reference_range}, return_arrs=True)[channel].reshape(data[spectral_axis].shape)
     else:
-        spectral_background = ph.roi(data, {spatial_axis:(spatial_reference_range,'average')}, return_arrs=True)[channel].reshape(data[spectral_axis].shape)
+        spectral_background = helpers.roi(data, {spatial_axis:(spatial_reference_range,'average')}, return_arrs=True)[channel].reshape(data[spectral_axis].shape)
     spatial_points = np.ones(data[spatial_axis].shape)
     background = spectral_background*spatial_points
     #create background-subtracted channel
@@ -66,14 +66,14 @@ def remove_spatial_background(data, channel, spectral_reference_range, name=None
     None - Creates new background-subtracted Channels in the Data instance. 
     """
     #identify channel and categorize axes
-    channel = ph.get_channels(data, channel)[0]
-    spectral_axis = ph.get_axes(data, 0)[0]
-    spatial_axis = ph.get_axes(data, 1)[0]
+    channel = helpers.get_channels(data, channel)[0]
+    spectral_axis = helpers.get_axes(data, 0)[0]
+    spatial_axis = helpers.get_axes(data, 1)[0]
     #construct the background array
     if isinstance(spectral_reference_range, int):
-        spatial_background = ph.roi(data, {spectral_axis:spectral_reference_range}, return_arrs=True)[channel].reshape(data[spatial_axis].shape)
+        spatial_background = helpers.roi(data, {spectral_axis:spectral_reference_range}, return_arrs=True)[channel].reshape(data[spatial_axis].shape)
     else:
-        spatial_background = ph.roi(data, {spectral_axis:(spectral_reference_range,'average')}, return_arrs=True)[channel].reshape(data[spatial_axis].shape)
+        spatial_background = helpers.roi(data, {spectral_axis:(spectral_reference_range,'average')}, return_arrs=True)[channel].reshape(data[spatial_axis].shape)
     spectral_points = np.ones(data[spectral_axis].shape)
     background = spatial_background*spectral_points
     #create background-subtracted channel
@@ -97,20 +97,20 @@ def remove_combined_background(data, channel, spectral_reference_range, spatial_
     def __at(arr, val):
         return (np.abs(arr-val)).argmin()
     #identify channel and categorize axes
-    channel = ph.get_channels(data, channel)[0]
-    spectral_axis = ph.get_axes(data, 0)[0]
-    spatial_axis = ph.get_axes(data, 1)[0]
+    channel = helpers.get_channels(data, channel)[0]
+    spectral_axis = helpers.get_axes(data, 0)[0]
+    spatial_axis = helpers.get_axes(data, 1)[0]
     #extract background along each axis
     if isinstance(spatial_reference_range, int):
-        spectral_background = ph.roi(data, {spatial_axis:spatial_reference_range}, return_arrs=True)[channel].reshape(data[spectral_axis].shape)
+        spectral_background = helpers.roi(data, {spatial_axis:spatial_reference_range}, return_arrs=True)[channel].reshape(data[spectral_axis].shape)
     else:
-        spectral_background = ph.roi(data, {spatial_axis:(spatial_reference_range,'average')}, return_arrs=True)[channel].reshape(data[spectral_axis].shape)
+        spectral_background = helpers.roi(data, {spatial_axis:(spatial_reference_range,'average')}, return_arrs=True)[channel].reshape(data[spectral_axis].shape)
     if isinstance(spectral_reference_range, int):
-        spatial_background = ph.roi(data, {spectral_axis:spectral_reference_range}, return_arrs=True)[channel].reshape(data[spatial_axis].shape)
+        spatial_background = helpers.roi(data, {spectral_axis:spectral_reference_range}, return_arrs=True)[channel].reshape(data[spatial_axis].shape)
     else:
-        spatial_background = ph.roi(data, {spectral_axis:(spectral_reference_range,'average')}, return_arrs=True)[channel].reshape(data[spatial_axis].shape)
+        spatial_background = helpers.roi(data, {spectral_axis:(spectral_reference_range,'average')}, return_arrs=True)[channel].reshape(data[spatial_axis].shape)
     #compute combined background using region of overlap as a reference for magnitude
-    overlap_magnitude = np.average(ph.roi(data, {0:spectral_reference_range, 1:spatial_reference_range}, return_arrs=True)[channel])
+    overlap_magnitude = np.average(helpers.roi(data, {0:spectral_reference_range, 1:spatial_reference_range}, return_arrs=True)[channel])
     background = spectral_background*spatial_background
     spectral_range = [__at(data[spectral_axis].points, spectral_reference_range[0]), __at(data[spectral_axis].points, spectral_reference_range[1])]
     spatial_range = [__at(data[spatial_axis].points, spatial_reference_range[0]), __at(data[spatial_axis].points, spatial_reference_range[1])]
@@ -134,7 +134,7 @@ def remove_combined_background(data, channel, spectral_reference_range, spatial_
 def plot_profile(data, channel, **kwargs):
     
     #convert axis/channel indices to natural names
-    channel, = ph.parse_args(data, channel, dtype='Channel')
+    channel, = helpers.parse_args(data, channel, dtype='Channel')
 
     #set parameters for plotting from kwargs
     params = {
@@ -157,16 +157,16 @@ def plot_profile(data, channel, **kwargs):
     params.update(**kwargs)
     
     if params["ROI"] is not None:
-        out = ph.roi(data, params["ROI"])
+        out = helpers.roi(data, params["ROI"])
     else:
         out = data
     
     #determine range to be plotted
     if params["vrange"] is None:
         if params["contrast"] is None:
-            vrange = ph.get_range(out, reference_key=channel)
+            vrange = helpers.get_range(out, reference_key=channel)
         else:
-            vrange = ph.contrast(out, channel, params["contrast"])
+            vrange = helpers.contrast(out, channel, params["contrast"])
     else:
         vrange = params["vrange"]
 
@@ -235,8 +235,8 @@ def plot_profile(data, channel, **kwargs):
     
 def plot_decomposition(data, non_spatial_axis, spatial_axis, channel, **kwargs):
     #convert axis/channel indices to natural names
-    non_spatial_axis, spatial_axis = ph.parse_args(data, non_spatial_axis, spatial_axis)
-    channel, = ph.parse_args(data, channel, dtype='Channel')
+    non_spatial_axis, spatial_axis = helpers.parse_args(data, non_spatial_axis, spatial_axis)
+    channel, = helpers.parse_args(data, channel, dtype='Channel')
 
     #set parameters for plotting from kwargs
     params = {
@@ -255,12 +255,12 @@ def plot_decomposition(data, non_spatial_axis, spatial_axis, channel, **kwargs):
 
     #extract ROI
     if params["ROI"] is not None:
-        out = ph.roi(data, params["ROI"])
+        out = helpers.roi(data, params["ROI"])
     else:
         out = data
       
     #identify spatial ranges for indexing
-    xrange = ph.get_range(out, reference_key=non_spatial_axis, dtype='Axis')
+    xrange = helpers.get_range(out, reference_key=non_spatial_axis, dtype='Axis')
 
     #setup plot frame
     fig, ax = plt.subplots(figsize=(params['fig_width'], params['fig_height']))
@@ -272,13 +272,13 @@ def plot_decomposition(data, non_spatial_axis, spatial_axis, channel, **kwargs):
         if params["binning"] == 'sum':
             arr_out = np.sum(out[channel][:], axis=1)
         #determine range to be plotted
-        vrange = ph.vrange(arr_out, out[channel].signed, window=1)
+        vrange = helpers.vrange(arr_out, out[channel].signed, window=1)
 
         ax.plot(out[non_spatial_axis].points, arr_out,
             params["marker"], linewidth=params["linewidth"], alpha=1, color=params["color"])
     else:
         #determine range to be plotted
-        vrange = ph.get_range(out, reference_key=channel)
+        vrange = helpers.get_range(out, reference_key=channel)
         for i in range(out[spatial_axis].size):
             if np.sum(out[channel][:,i]) != 0:
                 ax.plot(out[non_spatial_axis][:].flatten(), out[channel][:,i], 

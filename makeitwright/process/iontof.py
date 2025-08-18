@@ -1,13 +1,9 @@
-__name__ = "iontof"
-__author__ = "Chris Roy, Song Jin Research Group, Dept. of Chemistry, University of Wisconsin - Madison"
-
 import numpy as np
 import cmocean
 import pySPM
 import WrightTools as wt
-import hyperspectral, styles
-from hyperspectral import remove_background
-import processhelpers as proc
+from . import hyperspectral, styles
+from . import helpers
 
 def relative_proportion(data, channel0, channel1):
     """
@@ -27,15 +23,15 @@ def relative_proportion(data, channel0, channel1):
     """
     
     #convert channel indices to natural names
-    channels = proc.parse_args(data, channel0, channel1, dtype='Channel')
+    channels = helpers.parse_args(data, channel0, channel1, dtype='Channel')
     
     #ensure regions with no signal don't show up
-    remove_background(data, *channels, threshold_value=0.99, new_value=1)
+    hyperspectral.remove_background(data, *channels, threshold_value=0.99, new_value=1)
     dump = [data.channels[-2].natural_name, data.channels[-1].natural_name]
     
     #calculate normalized difference between channels
-    proc.normalize_by_axis(data, channels[0], 'x', 'y', 'scan')
-    proc.normalize_by_axis(data, channels[1], 'x', 'y', 'scan')
+    helpers.normalize_by_axis(data, channels[0], 'x', 'y', 'scan')
+    helpers.normalize_by_axis(data, channels[1], 'x', 'y', 'scan')
     ch_arr0 = data.channels[-2][:]
     dump.append(data.channels[-2].natural_name)
     ch_arr1 = data.channels[-1][:]
