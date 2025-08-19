@@ -1,6 +1,5 @@
-import makeitwright.core.styles as styles
+from .core import spectralprofile, hyperspectral, styles
 
-from .core import spectralprofile, hyperspectral
 
 def central_wavelength(data):
     raise NotImplementedError
