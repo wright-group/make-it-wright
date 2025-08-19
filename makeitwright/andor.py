@@ -3,7 +3,6 @@ import numpy as np
 
 from .core import image, spectralprofile, styles
 from .core.helpers import roi, set_label, get_channels
-import makeitwright.core.styles as styles
 
 
 APD_PIXEL = (1325, 1080)
