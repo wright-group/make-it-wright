@@ -1,58 +1,49 @@
 import pathlib
-import numpy as np
-import matplotlib.cm as cms
-import cmocean.cm as cmo
-from scipy.signal import savgol_filter as savgol
-from scipy.signal import medfilt2d
-from scipy.optimize import curve_fit
-from scipy.stats import pearsonr, spearmanr, ttest_ind
-import WrightTools as wt
-
-import makeitwright.process.andor as andor
-import makeitwright.process.beckerhickl as becker
-import makeitwright.process.spectralprofile
-
-from makeitwright.process.helpers import show, roi, norm, set_label
-from makeitwright.parsers import parse
-from makeitwright.artists import setparams, setdpi
-from makeitwright.spectra import plot_spectra as plot
-
-setparams()
-setdpi(150)
-
-fp = pathlib.Path().expanduser().resolve() / r"Desktop/Research Data/Wright Table/Original"  # filepath name to folder
+import matplotlib as mpl
+import makeitwright as mw
 
 
-#
+roi = mw.helpers.roi
+parse = mw.parsers.parse
+andor = mw.andor
+becker = mw.beckerhickl
+plot = mw.spectra.plot_spectra
+
+fp = pathlib.Path().expanduser().resolve() / r"Desktop/Research Data/Wright Table/Original"
+
+# set plotting parameters
+mpl.rcParams['font.sans-serif'] = "Arial"
+mpl.rcParams['font.family'] = "sans-serif"
+mpl.rcParams['font.size'] = 14
+mpl.rcParams['figure.dpi'] = 300
+mpl.rcParams['lines.linewidth'] = 4
+mpl.rcParams['pcolor.shading'] = 'auto'
+mpl.rcParams['figure.dpi'] = 150
+
 if True: # Plot PL
     data = parse(fp, keywords='4 hr.asc')
-    #andor.correct_PL_background(data, ybkg=[0, 20])
-    #y_profile = roi(data, {'wl': ([400, 800], 'sum')})                           # If need to check object area
-    #plot(y_profile)
     PL_ROI = roi(data, {'y': ([1021, 1047], 'average')})
     plot(PL_ROI, channel=0, xrange=[500, 850])
-    PL_output = open('C:/Users/kmfor/Desktop/Research Data/Wright Table/Original/4hr.txt', 'w')
+    PL_output = open(fp / '4hr.txt', 'w')
     PL_dataTrace = zip(PL_ROI.axes[0], PL_ROI.channels[0])
     for x in PL_dataTrace:
         PL_output.write(str(x[0])+'\t')
         PL_output.write(str(x[1])+'\n')
     PL_output.close()
 
-#
 if True: # Plot T/R/A
-    data = parse('C:/Users/kmfor/Desktop/Research Data/Wright Table/Original/For Chris/23_11_21/4ClPEASnI n1', keywords='Object 3')
+    data = parse(fp / 'For Chris/23_11_21/4ClPEASnI n1', keywords='Object 3')
     R = data[2]
     R_back = data[1]
     T = data[4]
     T_back = data[3]
-
     
     andor.compute_reflectance(R, R_back, dark_wavelength_range=None)
     y_profile = roi(R, {'wl': ([580, 750], 'sum')})                           # If need to check object area
     plot(y_profile)
     plot(R, channel=1, ROI={'y': ([1020, 1070], 'average')}, xrange=[580, 750]) #Currently at 10 x mag
     R_ROI = roi(R, {'y': ([1020, 1070], 'average')})
-    R_output = open('C:/Users/kmfor/Desktop/Research Data/Wright Table/Original/For Chris/23_11_21/4ClPEASnI n1/Object 3 R processed.txt', 'w')
+    R_output = open(fp / 'For Chris/23_11_21/4ClPEASnI n1/Object 3 R processed.txt', 'w')
     R_dataTrace = zip(R_ROI.axes[0], R_ROI.channels[1])
     for x in R_dataTrace:
         R_output.write(str(x[0])+'\t')
@@ -64,7 +55,7 @@ if True: # Plot T/R/A
     # plot(y_profile)
     plot(T, channel=1, ROI={'y': ([1020, 1070], 'average')}, xrange=[580, 750])     # Current 10x mag, 100x mag 54-70
     T_ROI = roi(T, {'y': ([1020, 1070], 'average')})
-    T_output = open('C:/Users/kmfor/Desktop/Research Data/Wright Table/Original/For Chris/23_11_21/4ClPEASnI n1/Object 3 T Processed.txt', 'w')
+    T_output = open(fp / 'For Chris/23_11_21/4ClPEASnI n1/Object 3 T Processed.txt', 'w')
     T_dataTrace = zip(T_ROI.axes[0], T_ROI.channels[1])
     for x in T_dataTrace:
         T_output.write(str(x[0])+'\t')
@@ -72,7 +63,7 @@ if True: # Plot T/R/A
     T_output.close()
     #
     andor.compute_absorbance(R, T)
-    A_output = open('C:/Users/kmfor/Desktop/Research Data/Wright Table/Original/For Chris/23_11_21/4ClPEASnI n1/Object 3 A processed.txt', 'w')
+    A_output = open(fp / 'For Chris/23_11_21/4ClPEASnI n1/Object 3 A processed.txt', 'w')
     A_ROI = roi(T, {'y': ([1020, 1070], 'average')})                        # A is channel 2 in both R and T data objects
     plot(R, channel=2, ROI={'y': ([1020, 1070], 'average')}, xrange=[580, 750]) #Current 10x mag. can add vrange
     A_dataTrace = zip(A_ROI.axes[0], A_ROI.channels[2])

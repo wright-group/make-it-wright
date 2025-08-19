@@ -3,61 +3,15 @@ from matplotlib import pyplot as plt
 from scipy.optimize import curve_fit
 from scipy.stats import pearsonr
 import WrightTools as wt
-import makeitwright.spectra as spectra, styles
-from .helpers import norm, roi
+from .core import spectra, styles
+from .core.helpers import norm, roi
 
-
-pi = np.pi
-
-
-def fromBruker(*filepaths):
-    d = []
-    for filepath in filepaths:
-        dtype = "Locked Coupled"
-        header_size=None
-        with open(filepath) as f:
-            txt = f.readlines()
-        for i, line in enumerate(txt):
-            if "ScanType" in line:
-                dtype = line.split('=')[-1].strip()
-            if "[Data]" in line:
-                header_size = i+2
-        if header_size is None:
-            try:
-                arr = np.genfromtxt(filepath, skip_header=166, delimiter=',')
-                print("Data header was not identified in file. Data in instance may not reflect complete file information.")
-            except:
-                print("Unable to read data from file due to lack of expected data header.")
-        else:
-            arr = np.genfromtxt(filepath, skip_header=header_size, delimiter=',')
-        
-        if arr.size > 0:
-            deg_arr = arr[:,0].flatten()
-            ch_arr = arr[:,1].flatten()
-            pat = wt.Data(name=filepath.split('/')[-1])
-            pat.create_channel('sig', values=ch_arr)
-            pat.create_channel('norm', values=norm(ch_arr, 1, 100))
-            pat.create_channel('log', values=np.log(norm(ch_arr, 1, 100)))
-            if dtype=="Locked Coupled":
-                pat.create_variable('ang', values=deg_arr, units='deg')
-                pat.transform('ang')
-                pat.attrs['acquisition'] = 'XRD_2theta'
-            if dtype=="Z-Drive":
-                pat.create_variable('z', values=deg_arr, units='mm')
-                pat.transform('z')
-                pat.attrs['acquisition'] = 'XRD_2theta'
-            pat.attrs['dtype'] = 'spectrum'
-            d.append(pat)
-        else:
-            print(f'file {filepath} was loaded but had no values')
-            
-    return d
 
 def get_fits(data, channel='norm', function='gauss', xrange='all'):
     def gauss(x, a, u, s):
         return a*np.exp(-((x-u)/(2*s))**2)
     def cauchy(x, a, u, s):
-        return a/(pi*s*(1+((x-u)/s)**2))     
+        return a/(np.pi*s*(1+((x-u)/s)**2))     
     
     functions = {
         'gauss' : gauss,

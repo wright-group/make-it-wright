@@ -3,8 +3,7 @@
 import numpy as np
 import WrightTools as wt
 from matplotlib import pyplot as plt
-from .process import helpers
-from . import styles
+from . import helpers, styles
 
 
 def plot_spectra(data, **kwargs):

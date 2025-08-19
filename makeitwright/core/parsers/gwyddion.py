@@ -1,12 +1,5 @@
-import numpy as np
 import WrightTools as wt
-
-
-def fromPicoView(filepath, name=None, convert_units=True, flatten_order=0):
-    """
-    under development
-    """
-    raise NotImplementedError
+import numpy as np
 
 
 def fromGwyddion_traces(filepath, name=None, convert_units=True, ID_steps=False, flatten=False):
@@ -117,3 +110,4 @@ def fromGwyddion_traces(filepath, name=None, convert_units=True, ID_steps=False,
     if len(data) == 1:
         data = data[0]
     return data
+

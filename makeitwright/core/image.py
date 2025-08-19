@@ -1,8 +1,7 @@
 import numpy as np
 import matplotlib as mpl
 from matplotlib import pyplot as plt
-from . import helpers
-import makeitwright.styles as styles 
+from . import helpers, styles
 
 def get_pixel_location(data, pixel):
     """

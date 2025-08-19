@@ -1,70 +1,6 @@
 import numpy as np
 import WrightTools as wt
-import makeitwright.styles as styles
-
-from . import spectralprofile
-from . import hyperspectral
-from . import helpers
-
-def central_wavelength(data):
-    pass
-
-def plot_image(data, channel, **kwargs):
-    params = {}
-    try:
-        unit = data['wl'].units
-    except KeyError:
-        unit = data.constants[0].units
-    if unit == 'wn':
-        params.update(styles.image_horiba_Raman)
-    else:
-        params.update(styles.image_horiba_PL)
-    params.update(**kwargs)
-    
-    if len(data.axes) == 3:
-        hyperspectral.plot_image(data, channel, **params)
-    else:
-        spectralprofile.plot_image(data, channel, **params)
-
-def plot_profile(data, channel, profile_axis='y', **kwargs):
-    params = {}
-    try:
-        unit = data['wl'].units
-    except KeyError:
-        unit = data.constants[0].units
-
-    if data.axes[1].natural_name == 't':
-        params.update(styles.profile_horiba_timed_series)
-    elif unit == 'wn':
-        params.update(styles.profile_horiba_Raman)
-    else:
-        params.update(styles.profile_horiba_PL)
-    params.update(**kwargs)
-    
-    if len(data.axes) == 3:
-        hyperspectral.plot_profile(data, profile_axis, channel, **params)
-    else:
-        spectralprofile.plot_profile(data, channel, **params)
-    
-def plot_decomposition(data, channel, **kwargs):
-    params = {}
-    try:
-        unit = data['wl'].units
-    except KeyError:
-        unit = data.constants[0].units
-    if unit == 'wn':
-        params.update(styles.decomposition_horiba_Raman)
-    else:
-        params.update(styles.decomposition_horiba_PL)
-    params.update(**kwargs)
-    
-    if len(data.axes) == 3:
-        hyperspectral.plot_decomposition(data, 0, 1, 2, channel, **params)
-    else:
-        spectralprofile.plot_decomposition(data, 0, 1, channel, **params)
-
-def fromAramis(filepath):
-    print("not ready yet, get to work :)")
+from ..helpers import norm
 
 
 def horiba_typeID(filepath):
@@ -157,7 +93,7 @@ def fromLabramHR(filepath, name=None, cps=False):
         d['wl'].label = spectlabels[spectral_units]
         d.create_channel('sig', values=sig)
         d['sig'].label = siglabels[spectral_units]
-        d.create_channel('norm', values=helpers.norm(sig, 0, 1))
+        d.create_channel('norm', values=norm(sig, 0, 1))
         d['norm'].label = 'norm. ' + siglabels[spectral_units].split(' (')[0]
         d.transform('wl')
         d.attrs['dtype'] = 'spectrum'
@@ -187,7 +123,7 @@ def fromLabramHR(filepath, name=None, cps=False):
                 spect['wl'].label = spectlabels[spectral_units]
                 spect.create_channel(name='sig', values=sig_i)
                 spect['sig'].label = siglabels[spectral_units]
-                spect.create_channel(name='norm', values=helpers.norm(sig_i, 0, 1))
+                spect.create_channel(name='norm', values=norm(sig_i, 0, 1))
                 spect['norm'].label = 'norm. ' + siglabels[spectral_units].split(' (')[0]
                 spect.transform('wl')
                 spect.attrs['dtype'] = 'spectrum'
@@ -253,4 +189,9 @@ def fromLabramHR(filepath, name=None, cps=False):
     return d
 
 def fromLabramHRTimedSeries(filedir):
-    pass
+    raise NotImplementedError
+
+def fromAramis(filepath):
+    raise NotImplementedError
+
+

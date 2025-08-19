@@ -4,8 +4,7 @@
 import numpy as np
 import matplotlib as mpl
 from matplotlib import pyplot as plt
-from . import helpers
-import makeitwright.styles as styles
+from . import helpers, styles
 
 
 def remove_spectral_background(data, channel, spatial_reference_range, name=None, create_background_channel=False, talkback=True):

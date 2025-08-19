@@ -1,6 +1,3 @@
-__name__ = "hyperspectral"
-__author__ = "Chris Roy, Song Jin Research Group, Dept. of Chemistry, University of Wisconsin - Madison"
-
 """
 Processing and plotting methods for 3-dimensional WrightTools data objects containing two spatial axes and one non-spatial axis (i.e. a spectral axis).
 
@@ -11,12 +8,11 @@ but an arbitrary non-spatial or pseudo-spatial axis may be used where relevant.
 Data axes must be ordered (spatial x, spatial y, non-spatial).
 """
 
-#import
 import numpy as np
 import matplotlib as mpl
 from matplotlib import pyplot as plt
-from . import helpers
-import makeitwright.styles as styles
+from . import helpers, styles
+
 
 def remove_background(data, channel, threshold=0.1, negative=False, return_mask=False, max_ref_count=10):
     """

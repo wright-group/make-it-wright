@@ -8,6 +8,15 @@ import pathlib
 from scipy.signal import savgol_filter
 from matplotlib import pyplot as plt
 
+import makeitwright as mw
+
+
+parse = mw.parsers.parse
+__at = mw.helpers.find_nearest()
+roi = mw.helpers.roi
+set_label = mw.helpers.set_label
+norm = mw.helpers.norm
+
 
 def lorentz_fit_2(data, channel='darksub', xrange='all', bounds=None, plot=False):
 
@@ -136,6 +145,7 @@ def testfit(data, channel='darksub', xrange='all', bounds=None, plot=False):
 def residual(a, fit):
     return (a-fit)/a*100
 
+
 base = pathlib.Path().expanduser().resolve() / r'OneDrive/Documents/UW/research/data local/WG-microscope/biexciton-fluence-dependent-PL_20220909'
 fn1 = base / "n1BA"
 fn2 = base / 'n2BAMA_CRRsample'
@@ -201,7 +211,7 @@ for d in n4raw:
     wlbkgsub = (d['sig'][:]-wlbkg)/exposure
     d.create_channel('constantbkgsub',values=constantbkgsub)
     d.create_channel('wlbkgsub',values=wlbkgsub)
-    set_label(d, 'wlbkgsub', "PL intensity (cps)")
+    # set_label(d, 'wlbkgsub', "PL intensity (cps)")
 
 bn1 = roi(n1raw,{'y':'sum'})
 bn2 = roi(n2raw,{'y':'sum'})
