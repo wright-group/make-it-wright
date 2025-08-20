@@ -19,14 +19,18 @@ Builds upon the WrightTools Data object.
 
 ### Basic
 
-`pip install git+https://github.com/wright-group/makeitwright.git`
+`pip install git+https://github.com/wright-group/make-it-wright.git`
+
+If you use conda, consider making an environment for this package prior to installing:
+`conda create -n makeitwright pip`
 
 ### IonTOF
 
 support for iontof data is optional; if you need to use iontof data, specify additional imports using:
 
-`pip install git+https://github.com/wright-group/makeitwright.git[iontof]`
+`pip install git+https://github.com/wright-group/make-it-wright.git[iontof]`
 
+Note that at the time of this writing, iontof must be used on python version <3.13.
 
 ## Examples
 
