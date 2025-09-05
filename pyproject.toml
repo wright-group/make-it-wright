@@ -5,11 +5,10 @@ build-backend = "flit_core.buildapi"
 [project]
 name = "makeitwright"
 description = "Plotting and parsing tools for the Jin Group."
+readme = "README.md"
 authors = [{name="Chris Roy"}]
 maintainers = [{name="Dan Kohler"}]
-dynamic = ["version"]
 requires-python = ">=3.7"
-readme = "README.md"
 dependencies = [
     "psutil",
     "wrighttools",
@@ -18,15 +17,15 @@ dependencies = [
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Science/Research",
-    "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",
     "Natural Language :: English",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.7",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "Topic :: Scientific/Engineering",
 ]
+dynamic = ["version"]
+license = "MIT"
 
 [project.optional-dependencies]
 iontof = ["pySPM"]
