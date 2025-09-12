@@ -11,6 +11,18 @@ from .iontof import fromITA, ITApeaks
 from .xrd import fromBruker
 
 
+px_per_um = {
+    '5x-Jin' : 0.893,
+    '20x-Jin' : 3.52, 
+    '100x-Wright' : 18.2,
+    '5' : 0.893,
+    '20' : 3.52,
+    '100' : 18.2,
+}
+# add 10x for now with approximation
+px_per_um["10"] = px_per_um["10x-Jin"] = 2 * px_per_um["5"]
+
+
 def typeID(*fpaths):
     """
     Infer what kind of data the file contains.
@@ -78,14 +90,14 @@ def parse(fdir, objective, select_types=None, keywords:list|str=[], exclude=[]):
             keywords = [keywords]
         for kw in keywords:
             for i, f in enumerate(files):
-                if kw not in f:
+                if kw not in str(f):
                     include[i]=0
     if exclude:
         if type(exclude) is not list:
             exclude = [exclude]
         for x in exclude:
             for i, f in enumerate(files):
-                if x in f:
+                if x in str(f):
                     include[i]=0
 
     files = [file for i, file in zip(include, files) if i]
@@ -118,7 +130,7 @@ def parse(fdir, objective, select_types=None, keywords:list|str=[], exclude=[]):
         too_much_data = True
     if len(ftypes) > 200:
         too_much_data = True
-    if sum([f.state()["st_size"] for f in files]) > virtual_memory().available:
+    if sum([f.stat().st_size for f in files]) > virtual_memory().available:
         too_much_data = True
 
     if too_much_data:
@@ -126,7 +138,7 @@ def parse(fdir, objective, select_types=None, keywords:list|str=[], exclude=[]):
 
     d = []
     for fpath, dtype in ftypes.items():
-        basename = fpath.split('/')[-1].split('.')[0]
+        basename = fpath.stem
 
         if dtype.startswith('LabramHR'):
             d.append(fromLabramHR(fpath, name=basename))
@@ -148,9 +160,10 @@ def parse(fdir, objective, select_types=None, keywords:list|str=[], exclude=[]):
 
         elif dtype=='ASCII':
             try:
-                d.append(fromAndorNeo(fpath, name=basename, objective_lens=objective))
-            except:
+                d.append(fromAndorNeo(fpath, name=basename, px_per_um=px_per_um[objective] if objective else None))
+            except Exception as e:
                 print(f'attempted to extract ASCII data from path <{fpath}> but it was not recognized by the andor module')
+                raise e
             print(basename)
         
         elif dtype=='wt5':
