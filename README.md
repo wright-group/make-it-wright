@@ -19,16 +19,29 @@ Builds upon the WrightTools Data object.
 
 ### Basic
 
-`pip install git+https://github.com/wright-group/make-it-wright.git`
+First download this repository and unzip it. 
+Navigate to the package directory (the folder containing the "pyproject.toml" file). 
+Create a conda environment for this package:
+```
+conda create -n makeitwright pip
+conda activate makeitwright
+```
+Still in this directory, install the package:
+```
+pip install .
+```
+If you wish to install in editable mode, use the same steps of above, but include the editable flag when installing:
+```
+pip install --editable .
+```
 
-If you use conda, consider making an environment for this package prior to installing:
-`conda create -n makeitwright pip`
+For whatever IDE you use (pyCharm, Spyder, VSCode), be sure to configure the editor so that you use the correct Conda environment (consult the documentation for the IDE). 
 
 ### IonTOF
 
 support for iontof data is optional; if you need to use iontof data, specify additional imports using:
 
-`pip install git+https://github.com/wright-group/make-it-wright.git[iontof]`
+`pip install .[iontof]`
 
 Note that at the time of this writing, iontof must be used on python version <3.13.
 
