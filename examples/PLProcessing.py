@@ -9,7 +9,7 @@ roi = mw.helpers.roi
 parse = mw.parsers.parse
 plot = mw.spectra.plot_spectra
 
-p = mw.datasets.PL  
+p = datasets.PL  
 filepath = p.parent
 filename = p.stem
 
@@ -33,7 +33,6 @@ if areaCheck == '1':
     con = input(f'Enter "1" to stop program. Otherwise, press enter to continue to PL processing: ')
     if con == '1':
         quit()
-
 
 # Process PL data
 PL_ROI = roi(data, {'y': ([ROI_lower, ROI_upper], 'average')})
