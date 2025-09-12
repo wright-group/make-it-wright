@@ -137,11 +137,14 @@ def find_peaks(*data, channel=-1, axis=0, peak_width="medium", noisy=False, **kw
     
     return peaks
 
-def norm(arr, tmin, tmax):
-    diff = tmax-tmin
-    arr_range = np.max(arr)-np.min(arr)
-    norm_arr = np.nan_to_num((((arr-np.min(arr))*diff)/arr_range) + tmin)
-    return norm_arr
+def norm(arr, tmin=0, tmax=1):
+    """
+    scale (and offset) an array's range of values to fit between `tmin` and `tmax`.
+    for some reason, we also set nans as zero and infinities to large real numbers...
+    """
+    new_range = tmax-tmin
+    old_range = np.max(arr)-np.min(arr)
+    return np.nan_to_num((((arr-np.min(arr))*new_range)/old_range) + tmin)
 
 def split_n(arr, *axes):
     """
