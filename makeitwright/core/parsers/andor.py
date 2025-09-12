@@ -50,7 +50,7 @@ def fromAndorNeo(fpath, name=None, px_per_um=None):
     if "wl" in data.variable_names:
         data["wl"].attrs['label'] = "wavelength (nm)" if data["wl"].units == "nm" else "wavenumber (cm-1)"
 
-    if data.signal.units == "Hz"
+    if data.signal.units == "Hz":
         data.signal.label = "intensity (cps)"
     else:
         data.signal.label = "counts"
