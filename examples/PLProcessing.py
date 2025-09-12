@@ -1,27 +1,27 @@
 
 # Process PL Data from Wright group
 
-import pathlib
 import makeitwright as mw
-
+from makeitwright import datasets
 
 andor = mw.andor
 roi = mw.helpers.roi
 parse = mw.parsers.parse
 plot = mw.spectra.plot_spectra
 
+p = mw.datasets.PL  
+filepath = p.parent
+filename = p.stem
 
-filepath = pathlib.Path().expanduser() / "Desktop" / "Research Data" / "Wright Table" / "Original" / "test"
-filename = "PEAPbI on FPEASnI PL 77K 4 2 hour wait for cool"
-obj = 10            # Objective magnification (5x, 10x, 50x, 100x)
-ROI_lower = 1000    # Lower and upper bounds of ROI
-ROI_upper = 1047
+obj = 10          # Objective magnification (5x, 10x, 50x, 100x)
+ROI_lower = 575    # Lower and upper bounds of ROI
+ROI_upper = 600
 plotx_lower = 500   # Lower and upper bounds of built-in plot x-axis
 plotx_upper = 800
 
 
 # Read data
-data = parse(filepath, objective=obj, keywords=filename + ".asc")
+data = parse(filepath, objective=str(obj), keywords=filename + ".asc")
 
 
 # Check object area
