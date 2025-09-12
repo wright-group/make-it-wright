@@ -1,6 +1,4 @@
-import numpy as np
 import WrightTools as wt
-from ..helpers import norm
 
 
 def fromSP130(fpath, **kwargs):
