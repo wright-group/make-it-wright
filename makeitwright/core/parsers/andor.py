@@ -41,10 +41,8 @@ def fromAndorNeo(fpath, name=None, px_per_um=None):
 
     for var in (("x", "y") and data.variable_names):
         if px_per_um:
-            data[var] /= px_per_um[str(px_per_um)]
+            data[var] /= px_per_um
             data[var].units = 'µm'
-        else:
-            data[var].units = "px"
 
     dtype = "image" if "x" in data.variable_names else "spectralprofile"
     data.attrs.update(dtype=dtype)
@@ -52,10 +50,10 @@ def fromAndorNeo(fpath, name=None, px_per_um=None):
     if "wl" in data.variable_names:
         data["wl"].attrs['label'] = "wavelength (nm)" if data["wl"].units == "nm" else "wavenumber (cm-1)"
 
-    if data.signal.units = "Hz"
-        data.signal.units = "intensity (cps)"
+    if data.signal.units == "Hz"
+        data.signal.label = "intensity (cps)"
     else:
-        data.signal.units = "counts"
+        data.signal.label = "counts"
 
     return data
 
