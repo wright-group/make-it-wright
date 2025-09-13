@@ -26,7 +26,6 @@ def fromAndorNeo(fpath, name=None, px_per_um=None):
     data
         New data object.
     """
-    # parse filepath
     data:wt.Data = wt.data.from_Solis(fpath, name=name, verbose=True)
     data.rename_variables(xindex="x", yindex="y", wm="wl")
     data.rename_channels(signal="sig")
@@ -46,6 +45,5 @@ def fromAndorNeo(fpath, name=None, px_per_um=None):
         data.sig.label = "intensity (cps)"
     else:
         data.sig.label = "counts"
-
 
     return data

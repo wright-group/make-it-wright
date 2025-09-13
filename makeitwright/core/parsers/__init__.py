@@ -40,9 +40,9 @@ def typeID(*fpaths):
             if "LabRAM HR" in txt:
                 if (htype := horiba_typeID(fpath)) is not None:
                     types[fpath] = htype
-            if "Goniometer" in txt:
+            elif "Goniometer" in txt:
                 types[fpath] = 'Bruker_XRD'
-            if "[m]" in txt:
+            elif "[m]" in txt:
                 types[fpath] = 'Gwyddion_traces'
 
         if fpath.suffix == '.asc':
@@ -56,7 +56,7 @@ def typeID(*fpaths):
         if fpath.suffix == '.wt5':
             types[fpath] = 'wt5'
 
-    print(f"{len(types)} of {len(fpaths)} files identified as valid data types")
+    print(f"{len(types)} of {len(fpaths)} files designated valid")
     return types
 
 
@@ -78,30 +78,43 @@ def listfiles(fdir:str|pathlib.Path, pattern:str="*") -> list[pathlib.Path]:
     ]
     
 
-def parse(fdir, objective, select_types=None, keywords:list|str=[], exclude=[]):
+def parse(fdir, objective, select_types=None, keywords:list|str=[], exclude:list|str=[]):
     """
-    DOCUMENTATION NEEDED
-    """
-    files = listfiles(fdir)
-    
-    include = [1 for i in range(len(files))]
-    if keywords:
-        if type(keywords) is not list:
-            keywords = [keywords]
-        for kw in keywords:
-            for i, f in enumerate(files):
-                if kw not in str(f):
-                    include[i]=0
-    if exclude:
-        if type(exclude) is not list:
-            exclude = [exclude]
-        for x in exclude:
-            for i, f in enumerate(files):
-                if x in str(f):
-                    include[i]=0
+    import all files in a directory matching name rules.
+    A file must match all provided keywords.
+    Any file that matches any exclude word is ignored. 
 
-    files = [file for i, file in zip(include, files) if i]
-    print(f'found {sum(include)} files matching keyword specifications')
+    Parameters
+    ----------
+    fdir: path-like
+        directory to search for files
+    objective: identifier
+        the objective used.  for images, this is used to convert camera indices into spatial coordinates
+    select_types: list of strings (optional)
+        types of data to keep (e.g. "TRPL").  other data types are ignored.
+    keywords: list of strings
+        files are only parsed if their names contain all keywords
+    exclude: string or list of strings
+        files are only parsed if their names contain no exclude words
+
+    see also
+    --------
+
+    WrightTools.collection.from_directory
+    """
+    if not isinstance(keywords, list):
+        keywords = [keywords]
+    if not isinstance(exclude, list):
+        exclude = [exclude]
+
+    files = [
+        file for file in filter(
+            lambda f: all([kw in str(f) for kw in keywords]) 
+                and all(x not in str(f) for x in exclude),
+            listfiles(fdir)
+        )
+    ]
+    print(f'found {len(files)} files matching keyword specifications')
     
     ftypes = typeID(*files)
     if select_types:
